@@ -30,7 +30,7 @@ class MyConvLSTMCell(nn.Module):
 
         nn.init.xavier_normal_(self.conv_i_xx.weight)
         nn.init.constant_(self.conv_i_xx.bias, 0)
-        nnn.init.xavier_normal_(self.conv_i_hh.weight)
+        nn.init.xavier_normal_(self.conv_i_hh.weight)
 
         nn.init.xavier_normal_(self.conv_f_xx.weight)
         nn.init.constant_(self.conv_f_xx.bias, 0)
