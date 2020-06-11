@@ -33,7 +33,6 @@ class MyConvLSTMCell(nn.Module):
         n.init.xavier_normal_.torch.nn.init.xavier_normal(self.conv_i_hh.weight)
 
         torch.nn.init.xavier_normal(self.conv_f_xx.weight)
-        torch.nn.init.xavier_normal
         torch.nn.init.constant(self.conv_f_xx.bias, 0)
         torch.nn.init.xavier_normal(self.conv_f_hh.weight)
 
