@@ -1,5 +1,8 @@
 import torch
-import resnetMod
+# For Colab:
+import ML_DL_Project.Scripts.resnetMod
+# For local:
+#import resnetMod
 import torch.nn as nn
 from torch.nn import functional as F
 from torch.autograd import Variable
