@@ -1,6 +1,6 @@
 import torch
 # For Colab:
-import ML_DL_Project.Scripts.resnetMod as resnetMod
+from ML_DL_Project.Scripts.resnetMod import *
 print(resnetMod)
 # For local:
 #import resnetMod
@@ -17,7 +17,8 @@ class attentionModel(nn.Module):
     def __init__(self, num_classes=61, mem_size=512):
         super(attentionModel, self).__init__()
         self.num_classes = num_classes
-        self.resNet = resnetMod.resnet34(True, True)
+        self.resNet = resnet34(True, True)
+        #self.resNet = resnetMod.resnet34(True, True)
         self.mem_size = mem_size
         self.weight_softmax = self.resNet.fc.weight
         self.lstm_cell = MyConvLSTMCell(512, mem_size)
