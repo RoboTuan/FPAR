@@ -29,20 +29,20 @@ class MyConvLSTMCell(nn.Module):
                                    bias=False)
 
         nn.init.xavier_normal_(self.conv_i_xx.weight)
-        torch.nn.init.constant(self.conv_i_xx.bias, 0)
-        nn.init.xavier_normal_.torch.nn.init.xavier_normal(self.conv_i_hh.weight)
+        nn.init.constant_(self.conv_i_xx.bias, 0)
+        nn.init.xavier_normal_torch.nn.init.xavier_normal(self.conv_i_hh.weight)
 
-        torch.nn.init.xavier_normal(self.conv_f_xx.weight)
+        nn.init.xavier_normal_(self.conv_f_xx.weight)
         torch.nn.init.constant(self.conv_f_xx.bias, 0)
-        torch.nn.init.xavier_normal(self.conv_f_hh.weight)
+        nn.init.xavier_normal_(self.conv_f_hh.weight)
 
-        torch.nn.init.xavier_normal(self.conv_c_xx.weight)
+        nn.init.xavier_normal_(self.conv_c_xx.weight)
         torch.nn.init.constant(self.conv_c_xx.bias, 0)
-        torch.nn.init.xavier_normal(self.conv_c_hh.weight)
+        nn.init.xavier_normal_(self.conv_c_hh.weight)
 
-        torch.nn.init.xavier_normal(self.conv_o_xx.weight)
+        nn.init.xavier_normal_(self.conv_o_xx.weight)
         torch.nn.init.constant(self.conv_o_xx.bias, 0)
-        torch.nn.init.xavier_normal(self.conv_o_hh.weight)
+        nn.init.xavier_normal_(self.conv_o_hh.weight)
 
     def forward(self, x, state):
         if state is None:
