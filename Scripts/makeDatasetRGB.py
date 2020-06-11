@@ -11,27 +11,45 @@ def gen_split(root_dir, stackSize):
     Dataset = []
     Labels = []
     NumFrames = []
-    root_dir = os.path.join(root_dir, 'frames')
+    root_dir = os.path.join(root_dir, 'processed_frames2')
+    # print for debugging
+    #print(f"root_dir: {root_dir}")
     for dir_user in sorted(os.listdir(root_dir)):
+      if not dir_user.startswith('.') and dir_user != "S2" :
         class_id = 0
-        dir = os.path.join(root_dir, dir_user)
-        for target in sorted(os.listdir(dir)):
-            dir1 = os.path.join(dir, target)
-            insts = sorted(os.listdir(dir1))
+        directory = os.path.join(root_dir, dir_user)
+        # print for debugging
+        #print(f"directory: {directory}")
+        for target in sorted(os.listdir(directory)):
+          if not target.startswith('.'):
+            directory1 = os.path.join(directory, target)
+            # print for debugging
+            #print(f"directory1: {directory1}")
+            insts = sorted(os.listdir(directory1))
+            # print for debugging
+            #print(f"insts: {insts}")
             if insts != []:
-                for inst in insts:
-                    inst_dir = os.path.join(dir1, inst)
-                    numFrames = len(glob.glob1(inst_dir, '*.jpg'))
-                    if numFrames >= stackSize:
-                        Dataset.append(inst_dir)
-                        Labels.append(class_id)
-                        NumFrames.append(numFrames)
+               for inst in insts:
+                 if not inst.startswith('.'):
+                   # adding "rgb" to path becasue after the number there are
+                   # both "rgb" and "mmap" directories
+                   inst = inst + "/rgb"
+                   inst_dir = os.path.join(directory1, inst)
+                   # print for debugging
+                   #print(f"inst_dir: {inst_dir}")
+                   numFrames = len(glob.glob1(inst_dir, '*.png'))
+                   # print for debugging
+                   #print(f"numFrames: {numFrames}")
+                   if numFrames >= stackSize:
+                     Dataset.append(inst_dir)
+                     Labels.append(class_id)
+                     NumFrames.append(numFrames)
             class_id += 1
     return Dataset, Labels, NumFrames
 
 class makeDataset(Dataset):
     def __init__(self, root_dir, spatial_transform=None, seqLen=20,
-                 train=True, mulSeg=False, numSeg=1, fmt='.jpg'):
+                 train=True, mulSeg=False, numSeg=1, fmt='.png'):
 
         self.images, self.labels, self.numFrames = gen_split(root_dir, 5)
         self.spatial_transform = spatial_transform
@@ -39,6 +57,8 @@ class makeDataset(Dataset):
         self.mulSeg = mulSeg
         self.numSeg = numSeg
         self.seqLen = seqLen
+        # print for debugging
+        #print(self.seqLen)
         self.fmt = fmt
 
     def __len__(self):
@@ -49,10 +69,15 @@ class makeDataset(Dataset):
         label = self.labels[idx]
         numFrame = self.numFrames[idx]
         inpSeq = []
+         # For debugging
+        #print(numFrame, self.seqLen)
         self.spatial_transform.randomize_parameters()
         for i in np.linspace(1, numFrame, self.seqLen, endpoint=False):
-            fl_name = vid_name + '/' + 'image_' + str(int(np.floor(i))).zfill(5) + self.fmt
-            img = Image.open(fl_name)
-            inpSeq.append(self.spatial_transform(img.convert('RGB')))
+          # Corrected with "rgb" instead of "image_" and zfill(4) instead of zfill(5)
+          fl_name = vid_name + '/' + 'rgb' + str(int(np.floor(i))).zfill(4) + self.fmt
+          img = Image.open(fl_name)
+          # For debugging
+          #print(img)
+          inpSeq.append(self.spatial_transform(img.convert('RGB')))
         inpSeq = torch.stack(inpSeq, 0)
         return inpSeq, label
