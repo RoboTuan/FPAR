@@ -28,9 +28,9 @@ class MyConvLSTMCell(nn.Module):
         self.conv_o_hh = nn.Conv2d(hidden_size, hidden_size, kernel_size=kernel_size, stride=stride, padding=padding,
                                    bias=False)
 
-        nn.init.xavier_normal_.torch.nn.init.xavier_normal(self.conv_i_xx.weight)
+        nn.init.xavier_normal_(self.conv_i_xx.weight)
         torch.nn.init.constant(self.conv_i_xx.bias, 0)
-        n.init.xavier_normal_.torch.nn.init.xavier_normal(self.conv_i_hh.weight)
+        nn.init.xavier_normal_.torch.nn.init.xavier_normal(self.conv_i_hh.weight)
 
         torch.nn.init.xavier_normal(self.conv_f_xx.weight)
         torch.nn.init.constant(self.conv_f_xx.bias, 0)
