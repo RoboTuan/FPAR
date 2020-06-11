@@ -1,6 +1,7 @@
 import torch
 # For Colab:
 import ML_DL_Project.Scripts.resnetMod as resnetMod
+print(resnetMod)
 # For local:
 #import resnetMod
 import torch.nn as nn
