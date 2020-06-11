@@ -6,7 +6,10 @@ import ML_DL_Project.Scripts.resnetMod
 import torch.nn as nn
 from torch.nn import functional as F
 from torch.autograd import Variable
-from MyConvLSTMCell import *
+# For Colab
+from ML_DL_Project.Scripts.MyConvLSTMCell import *
+# For local:
+#from MyConvLSTMCell import *
 
 
 class attentionModel(nn.Module):
