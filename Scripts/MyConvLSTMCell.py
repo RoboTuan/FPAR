@@ -49,10 +49,10 @@ class MyConvLSTMCell(nn.Module):
             state = (Variable(torch.randn(x.size(0), x.size(1), x.size(2), x.size(3)).cuda()),
                      Variable(torch.randn(x.size(0), x.size(1), x.size(2), x.size(3)).cuda()))
         ht_1, ct_1 = state
-        it = F.sigmoid(self.conv_i_xx(x) + self.conv_i_hh(ht_1))
-        ft = F.sigmoid(self.conv_f_xx(x) + self.conv_f_hh(ht_1))
-        ct_tilde = F.tanh(self.conv_c_xx(x) + self.conv_c_hh(ht_1))
+        it = torch.sigmoid(self.conv_i_xx(x) + self.conv_i_hh(ht_1))
+        ft = torch.sigmoid(self.conv_f_xx(x) + self.conv_f_hh(ht_1))
+        ct_tilde = torch.tanh(self.conv_c_xx(x) + self.conv_c_hh(ht_1))
         ct = (ct_tilde * it) + (ct_1 * ft)
-        ot = F.sigmoid(self.conv_o_xx(x) + self.conv_o_hh(ht_1))
-        ht = ot * F.tanh(ct)
+        ot = torch.sigmoid(self.conv_o_xx(x) + self.conv_o_hh(ht_1))
+        ht = ot * torch.tanh(ct)
         return ht, ct
