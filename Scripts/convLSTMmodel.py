@@ -12,13 +12,12 @@ from ML_DL_Project.Scripts.MyConvLSTMCell import *
 #from MyConvLSTMCell import *
 
 
-class attentionModel(nn.Module):
+class CLSTM_Model(nn.Module):
     def __init__(self, num_classes=61, mem_size=512):
         super(attentionModel, self).__init__()
         self.num_classes = num_classes
         self.resNet = resnetMod.resnet34(True, True)
         self.mem_size = mem_size
-        self.weight_softmax = self.resNet.fc.weight
         self.lstm_cell = MyConvLSTMCell(512, mem_size)
         self.avgpool = nn.AvgPool2d(7)
         self.dropout = nn.Dropout(0.7)
