@@ -12,9 +12,9 @@ from ML_DL_Project.Scripts.MyConvLSTMCell import *
 #from MyConvLSTMCell import *
 
 
-class CLSTM_Model(nn.Module):
+class clstm_Model(nn.Module):
     def __init__(self, num_classes=61, mem_size=512):
-        super(attentionModel, self).__init__()
+        super(cltsm_Model, self).__init__()
         self.num_classes = num_classes
         self.resNet = resnetMod.resnet34(True, True)
         self.mem_size = mem_size
