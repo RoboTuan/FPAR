@@ -15,7 +15,7 @@ def gen_split(root_dir, stackSize):
     # print for debugging
     #print(f"root_dir: {root_dir}")
     for dir_user in sorted(os.listdir(root_dir)):
-      if not dir_user.startswith('.') and dir_user != "S2" :
+      if not dir_user.startswith('.') and dir_user:
         class_id = 0
         directory = os.path.join(root_dir, dir_user)
         # print for debugging
