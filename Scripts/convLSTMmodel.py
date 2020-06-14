@@ -14,7 +14,7 @@ from ML_DL_Project.Scripts.MyConvLSTMCell import *
 
 class clstm_Model(nn.Module):
     def __init__(self, num_classes=61, mem_size=512):
-        super(cltsm_Model, self).__init__()
+        super(clstm_Model, self).__init__()
         self.num_classes = num_classes
         self.resNet = resnetMod.resnet34(True, True)
         self.mem_size = mem_size
