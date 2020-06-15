@@ -1,6 +1,6 @@
 import torch
-from flow_resnet import *
-from objectAttentionModelConvLSTM import *
+from ML_DL_Project.Scripts.flow_resnet import *
+from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
 import torch.nn as nn
 
 
