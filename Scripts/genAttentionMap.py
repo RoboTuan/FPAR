@@ -1,8 +1,8 @@
 import numpy as np
 from torchvision import transforms
 import cv2
-from objectAttentionModelConvLSTM import *
-from attentionMapModel import attentionMap
+from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
+from ML_DL_Project.Scripts.attentionMapModel import attentionMap
 from PIL import Image
 
 ####################Model definition###############################
