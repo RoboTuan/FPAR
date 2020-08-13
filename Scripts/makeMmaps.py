@@ -11,6 +11,8 @@ def gen_split(root_dir, stackSize):
     Dataset = []
     Labels = []
     NumFrames = []
+    Maps = []
+    FramesMaps = []
     root_dir = os.path.join(root_dir, 'processed_frames2')
     # print for debugging
     #print(f"root_dir: {root_dir}")
@@ -33,7 +35,12 @@ def gen_split(root_dir, stackSize):
                  if not inst.startswith('.'):
                    # adding "rgb" to path becasue after the number there are
                    # both "rgb" and "mmap" directories
-                   inst = inst + "/mmaps"
+                   root_position_for_map = os.path.join(directory1, inst)
+                   # print for debugging
+                   #print(f"root_position_for_map: {root_position_for_map}")
+                   #print(f"root_position_for_map: {root_position_for_map}")
+
+                   inst = inst + "/rgb"
                    inst_dir = os.path.join(directory1, inst)
                    # print for debugging
                    #print(f"inst_dir: {inst_dir}")
@@ -44,14 +51,30 @@ def gen_split(root_dir, stackSize):
                      Dataset.append(inst_dir)
                      Labels.append(class_id)
                      NumFrames.append(numFrames)
-            class_id += 1
-    return Dataset, Labels, NumFrames
+                   
+                   #inst_dir = os.path.join(inst_dir, inst+"/mmaps") 
+                   inst_dir_map = root_position_for_map + "/mmaps"
+                   
 
-class makeMmaps(Dataset):
+                   #print(f"inst_dir_map: {inst_dir_map}")
+                   #print(f"inst_dir_maps: {inst_dir_maps}")
+
+                   numFramesMaps = len(glob.glob1(inst_dir_map, '*.png'))
+                   #print(f"numFramesMaps: {numFramesMaps}")
+
+                   # Non numMapFrames perchè non ci interessa
+                   if numFrames >= stackSize:
+                     Maps.append(inst_dir_map)
+                     FramesMaps.append(numFramesMaps)
+
+            class_id += 1
+    return Dataset, Maps, Labels, NumFrames, FramesMaps
+
+class makeDataset(Dataset):
     def __init__(self, root_dir, spatial_transform=None, seqLen=20,
                  train=True, mulSeg=False, numSeg=1, fmt='.png'):
 
-        self.images, self.labels, self.numFrames = gen_split(root_dir, 5)
+        self.images, self.maps, self.labels, self.numFrames, self.numMapFrames = gen_split(root_dir, 5)
         self.spatial_transform = spatial_transform
         self.train = train
         self.mulSeg = mulSeg
@@ -66,18 +89,43 @@ class makeMmaps(Dataset):
 
     def __getitem__(self, idx):
         vid_name = self.images[idx]
+        map_name = self.maps[idx]
+
         label = self.labels[idx]
         numFrame = self.numFrames[idx]
+
+
         inpSeq = []
+        mapSeq = []
          # For debugging
         #print(numFrame, self.seqLen)
         self.spatial_transform.randomize_parameters()
         for i in np.linspace(1, numFrame, self.seqLen, endpoint=False):
+          #print(i)
           # Corrected with "rgb" instead of "image_" and zfill(4) instead of zfill(5)
-          fl_name = vid_name + '/' + 'map' + str(int(np.floor(i))).zfill(4) + self.fmt
+          fl_name = vid_name + '/' + 'rgb' + str(int(np.floor(i))).zfill(4) + self.fmt
+          #print(fl_name)
           img = Image.open(fl_name)
           # For debugging
-          #print(img, fl_name)
+          #print(img)
+
+          flag=1
+          j=i
+          while(flag):
+            maps_name = map_name + '/' + 'map' + str(int(np.floor(j))).zfill(4) + self.fmt
+            #print(maps_name)
+            try:
+              mappa = Image.open(maps_name)
+              flag=0
+            except:
+              if j<=i:
+                j= 2*i-j+1 #j=i --> j=i +1 ; j=i-1 j-i=-1 --> j=i-(-1)+1
+              else:
+                j= 2*i-j #j=i+1 j-i=1 --> j=i-1
+              continue
           inpSeq.append(self.spatial_transform(img.convert('RGB')))
+          mapSeq.append(self.spatial_transform(mappa.convert('L')))
+
         inpSeq = torch.stack(inpSeq, 0)
-        return inpSeq, label
+        mapSeq = torch.stack(mapSeq, 0)
+        return inpSeq, mapSeq, label
