@@ -12,11 +12,11 @@ import sys
 """
 
 from __future__ import print_function, division
-from Scripts.objectAttentionModelConvLSTM import *
-from Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+from objectAttentionModelConvLSTM import *
+from spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
 from torch.utils.tensorboard import SummaryWriter
-from Scripts.makeDatasetRGB import *
+from makeDatasetRGB import *
 import argparse
 import sys
 
