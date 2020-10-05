@@ -1,15 +1,17 @@
 from __future__ import print_function, division
-from objectAttentionModelConvLSTM import *
-from spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+# This is without attention, we must address this better
+#from ML_DL_Project.Scripts.convLSTMmodel import *
+from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
+from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
-from tensorboardX import SummaryWriter
-from makeDatasetRGB import *
+from torch.utils.tensorboard import SummaryWriter
+from ML_DL_Project.Scripts.makeDatasetRGB import *
 import argparse
 import sys
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decay_factor, decay_step, memSize):
+             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -23,8 +25,13 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
         print('Dataset not found')
         sys.exit()
 
+    # Setting Device
+    DEVICE = "cuda"
+
     model_folder = os.path.join('./', out_dir, dataset, 'rgb', 'stage'+str(stage))  # Dir for saving models and log files
     # Create the dir
+    # TODO:
+    # see if is necessary other if as in colab
     if os.path.exists(model_folder):
         print('Directory {} exists!'.format(model_folder))
         sys.exit()
@@ -49,27 +56,30 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
                             shuffle=True, num_workers=4, pin_memory=True)
     if val_data_dir is not None:
+        vid_seq_val = makeDataset(val_data_dir,spatial_transform = Compose([Scale(256),
+                                                                            CenterCrop(224),
+                                                                            ToTensor(),
+                                                                            normalize]),
+                                    seqLen=seqLen, fmt='.png')
 
-        vid_seq_val = makeDataset(val_data_dir,
-                                   spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
-                                   seqLen=seqLen, fmt='.jpg')
-
-        val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize,
-                                shuffle=False, num_workers=2, pin_memory=True)
+        val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
         valInstances = vid_seq_val.__len__()
+        
+        trainInstances = vid_seq_train.__len__()
 
-
-    trainInstances = vid_seq_train.__len__()
 
     train_params = []
     if stage == 1:
-
+        # DO this fo no attention, we must address it better
+        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
         model = attentionModel(num_classes=num_classes, mem_size=memSize)
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
     else:
 
+        # DO this fo no attention, we must address it better
+        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
         model = attentionModel(num_classes=num_classes, mem_size=memSize)
         model.load_state_dict(torch.load(stage1_dict))
         model.train(False)
@@ -124,20 +134,21 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     model.lstm_cell.train(True)
 
     model.classifier.train(True)
-    model.cuda()
+
+    model = model.to(DEVICE)
 
     loss_fn = nn.CrossEntropyLoss()
 
     optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
 
-    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=decay_step,
-                                                           gamma=decay_factor)
+    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
+
 
     train_iter = 0
     min_accuracy = 0
 
+
     for epoch in range(numEpochs):
-        optim_scheduler.step()
         epoch_loss = 0
         numCorrTrain = 0
         trainSamples = 0
@@ -157,18 +168,22 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             train_iter += 1
             iterPerEpoch += 1
             optimizer_fn.zero_grad()
-            inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda())
-            labelVariable = Variable(targets.cuda())
+            inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).to(DEVICE))
+            labelVariable = Variable(targets.to(DEVICE))
             trainSamples += inputs.size(0)
             output_label, _ = model(inputVariable)
             loss = loss_fn(output_label, labelVariable)
             loss.backward()
             optimizer_fn.step()
             _, predicted = torch.max(output_label.data, 1)
-            numCorrTrain += (predicted == targets.cuda()).sum()
-            epoch_loss += loss.data[0]
+            numCorrTrain += (predicted == targets.to(DEVICE)).sum()
+            # see if loss.item() has to be multiplied by inputs.size(0)
+            epoch_loss += loss.item()
         avg_loss = epoch_loss/iterPerEpoch
-        trainAccuracy = (numCorrTrain / trainSamples) * 100
+        # This is deprecated, see if the below "torch.true_divide" is correct
+        #trainAccuracy =  (numCorrTrain / trainSamples) * 100
+        trainAccuracy =  torch.true_divide(numCorrTrain, trainSamples) * 100
+        optim_scheduler.step()
 
         print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
@@ -180,17 +195,24 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                 val_iter = 0
                 val_samples = 0
                 numCorr = 0
-                for j, (inputs, targets) in enumerate(val_loader):
-                    val_iter += 1
-                    val_samples += inputs.size(0)
-                    inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
-                    labelVariable = Variable(targets.cuda(async=True), volatile=True)
-                    output_label, _ = model(inputVariable)
-                    val_loss = loss_fn(output_label, labelVariable)
-                    val_loss_epoch += val_loss.data[0]
-                    _, predicted = torch.max(output_label.data, 1)
-                    numCorr += (predicted == targets.cuda()).sum()
-                val_accuracy = (numCorr / val_samples) * 100
+                with torch.no_grad():
+                    for j, (inputs, targets) in enumerate(val_loader):
+
+                        val_iter += 1
+                        val_samples += inputs.size(0)
+                        # Deprecated
+                        #inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
+                        #labelVariable = Variable(targets.cuda(async=True), volatile=True)
+                        inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
+                        labelVariable = targets.to(DEVICE)
+                        output_label, _ = model(inputVariable)
+                        val_loss = loss_fn(output_label, labelVariable)
+                        val_loss_epoch += val_loss.item()
+                        _, predicted = torch.max(output_label.data, 1)
+                        numCorr += (predicted == targets.cuda()).sum()
+                # This is deprecated, see if the below "torch.true_divide" is correct
+                #val_accuracy = (numCorr / val_samples) * 100
+                val_accuracy = torch.true_divide(numCorr, val_samples) * 100
                 avg_val_loss = val_loss_epoch / val_iter
                 print('Val: Epoch = {} | Loss {} | Accuracy = {}'.format(epoch + 1, avg_val_loss, val_accuracy))
                 writer.add_scalar('val/epoch_loss', avg_val_loss, epoch + 1)
