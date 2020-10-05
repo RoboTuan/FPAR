@@ -237,7 +237,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
 
 def __main__():
-    parser = argparse.ArgumentParser()
+    # Added prog='myprogram', description='Foo' for colab parses issues
+    parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--stage', type=int, default=1, help='Training stage')
     parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
