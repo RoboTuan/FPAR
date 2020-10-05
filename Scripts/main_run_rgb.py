@@ -257,7 +257,10 @@ def __main__():
     parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
 
-    args = parser.parse_args()
+    #args = parser.parse_args()
+
+    # Added args, _ = parser.parse_known_args() for colab parses issues
+    args, _ = parser.parse_known_args()
 
     dataset = args.dataset
     stage = args.stage
