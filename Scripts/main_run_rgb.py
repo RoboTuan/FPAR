@@ -1,3 +1,4 @@
+"""
 from __future__ import print_function, division
 # This is without attention, we must address this better
 #from ML_DL_Project.Scripts.convLSTMmodel import *
@@ -6,6 +7,16 @@ from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterC
                                 RandomHorizontalFlip)
 from torch.utils.tensorboard import SummaryWriter
 from ML_DL_Project.Scripts.makeDatasetRGB import *
+import argparse
+import sys
+"""
+
+from __future__ import print_function, division
+from Scripts.objectAttentionModelConvLSTM import *
+from Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+                                RandomHorizontalFlip)
+from torch.utils.tensorboard import SummaryWriter
+from Scripts.makeDatasetRGB import *
 import argparse
 import sys
 
@@ -238,6 +249,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
 def __main__():
     # Added prog='myprogram', description='Foo' for colab parses issues
+    # THIS DIDN'T FIX THE PROBLEM
     parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--stage', type=int, default=1, help='Training stage')
@@ -260,6 +272,7 @@ def __main__():
     #args = parser.parse_args()
 
     # Added args, _ = parser.parse_known_args() for colab parses issues
+    # THIS FIXED THE PROBLEM
     args, _ = parser.parse_known_args()
 
     dataset = args.dataset
