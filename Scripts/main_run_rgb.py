@@ -235,8 +235,9 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     writer.export_scalars_to_json(model_folder + "/all_scalars.json")
     writer.close()
 
-
-def __main__():
+# Renamed main
+# def __main__():
+def main():
     # Added prog='myprogram', description='Foo' for colab parses issues
     # THIS DIDN'T FIX THE PROBLEM
     parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
