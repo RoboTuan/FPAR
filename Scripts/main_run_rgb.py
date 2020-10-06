@@ -1,4 +1,3 @@
-"""
 from __future__ import print_function, division
 # This is without attention, we must address this better
 #from ML_DL_Project.Scripts.convLSTMmodel import *
@@ -7,16 +6,6 @@ from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterC
                                 RandomHorizontalFlip)
 from torch.utils.tensorboard import SummaryWriter
 from ML_DL_Project.Scripts.makeDatasetRGB import *
-import argparse
-import sys
-"""
-
-from __future__ import print_function, division
-from objectAttentionModelConvLSTM import *
-from spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
-                                RandomHorizontalFlip)
-from torch.utils.tensorboard import SummaryWriter
-from makeDatasetRGB import *
 import argparse
 import sys
 
@@ -246,51 +235,52 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     writer.export_scalars_to_json(model_folder + "/all_scalars.json")
     writer.close()
 
+if __name__ == '__main__':
 
-def __main__():
-    # Added prog='myprogram', description='Foo' for colab parses issues
-    # THIS DIDN'T FIX THE PROBLEM
-    parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
-    parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
-    parser.add_argument('--stage', type=int, default=1, help='Training stage')
-    parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
-                        help='Train set directory')
-    parser.add_argument('--valDatasetDir', type=str, default=None,
-                        help='Val set directory')
-    parser.add_argument('--outDir', type=str, default='experiments', help='Directory to save results')
-    parser.add_argument('--stage1Dict', type=str, default='./experiments/gtea61/rgb/stage1/best_model_state_dict.pth',
-                        help='Stage 1 model path')
-    parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
-    parser.add_argument('--trainBatchSize', type=int, default=32, help='Training batch size')
-    parser.add_argument('--valBatchSize', type=int, default=64, help='Validation batch size')
-    parser.add_argument('--numEpochs', type=int, default=300, help='Number of epochs')
-    parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
-    parser.add_argument('--stepSize', type=float, default=[25, 75, 150], nargs="+", help='Learning rate decay step')
-    parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
-    parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
+    def __main__():
+        # Added prog='myprogram', description='Foo' for colab parses issues
+        # THIS DIDN'T FIX THE PROBLEM
+        parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
+        parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
+        parser.add_argument('--stage', type=int, default=1, help='Training stage')
+        parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
+                            help='Train set directory')
+        parser.add_argument('--valDatasetDir', type=str, default=None,
+                            help='Val set directory')
+        parser.add_argument('--outDir', type=str, default='experiments', help='Directory to save results')
+        parser.add_argument('--stage1Dict', type=str, default='./experiments/gtea61/rgb/stage1/best_model_state_dict.pth',
+                            help='Stage 1 model path')
+        parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
+        parser.add_argument('--trainBatchSize', type=int, default=32, help='Training batch size')
+        parser.add_argument('--valBatchSize', type=int, default=64, help='Validation batch size')
+        parser.add_argument('--numEpochs', type=int, default=300, help='Number of epochs')
+        parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
+        parser.add_argument('--stepSize', type=float, default=[25, 75, 150], nargs="+", help='Learning rate decay step')
+        parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
+        parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
 
-    #args = parser.parse_args()
+        #args = parser.parse_args()
 
-    # Added args, _ = parser.parse_known_args() for colab parses issues
-    # THIS FIXED THE PROBLEM
-    args, _ = parser.parse_known_args()
+        # Added args, _ = parser.parse_known_args() for colab parses issues
+        # THIS FIXED THE PROBLEM
+        args, _ = parser.parse_known_args()
 
-    dataset = args.dataset
-    stage = args.stage
-    trainDatasetDir = args.trainDatasetDir
-    valDatasetDir = args.valDatasetDir
-    outDir = args.outDir
-    stage1Dict = args.stage1Dict
-    seqLen = args.seqLen
-    trainBatchSize = args.trainBatchSize
-    valBatchSize = args.valBatchSize
-    numEpochs = args.numEpochs
-    lr1 = args.lr
-    stepSize = args.stepSize
-    decayRate = args.decayRate
-    memSize = args.memSize
+        dataset = args.dataset
+        stage = args.stage
+        trainDatasetDir = args.trainDatasetDir
+        valDatasetDir = args.valDatasetDir
+        outDir = args.outDir
+        stage1Dict = args.stage1Dict
+        seqLen = args.seqLen
+        trainBatchSize = args.trainBatchSize
+        valBatchSize = args.valBatchSize
+        numEpochs = args.numEpochs
+        lr1 = args.lr
+        stepSize = args.stepSize
+        decayRate = args.decayRate
+        memSize = args.memSize
 
-    main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize)
+        main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
+                valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize)
 
-__main__()
+    __main__()
