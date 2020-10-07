@@ -237,7 +237,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
 # Renamed main
 # def __main__():
-def main():
+def main(argv):
     # Added prog='myprogram', description='Foo' for colab parses issues
     # THIS DIDN'T FIX THE PROBLEM
     parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
@@ -263,7 +263,7 @@ def main():
 
     # Added args, _ = parser.parse_known_args() for colab parses issues
     # THIS FIXED THE PROBLEM
-    args, _ = parser.parse_known_args()
+    args, _ = parser.parse_known_args(argv)
 
     dataset = args.dataset
     stage = args.stage
@@ -286,7 +286,7 @@ def main():
 # Don't run it automatically for colab
 #__main__()
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
 
 
