@@ -232,12 +232,13 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_log_acc.close()
     val_log_acc.close()
     val_log_loss.close()
-    writer.export_scalars_to_json(model_folder + "/all_scalars.json")
+    #writer.export_scalars_to_json(model_folder + "/all_scalars.json")
     writer.close()
 
 # Renamed main
 # def __main__():
-def main(argv):
+# Added argv as input
+def main(argv=None):
     # Added prog='myprogram', description='Foo' for colab parses issues
     # THIS DIDN'T FIX THE PROBLEM
     parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
@@ -263,6 +264,7 @@ def main(argv):
 
     # Added args, _ = parser.parse_known_args() for colab parses issues
     # THIS FIXED THE PROBLEM
+    # added argv, see input of main
     args, _ = parser.parse_known_args(argv)
 
     dataset = args.dataset
