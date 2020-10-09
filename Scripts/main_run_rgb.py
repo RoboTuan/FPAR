@@ -235,6 +235,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     val_log_acc.close()
     val_log_loss.close()
     #writer.export_scalars_to_json(model_folder + "/all_scalars.json")
+    writer.flush()
     writer.close()
 
 # Renamed main
