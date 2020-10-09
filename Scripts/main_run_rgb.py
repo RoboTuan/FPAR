@@ -72,16 +72,16 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     if stage == 1:
         
         # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
-        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
+        model = attentionModel(num_classes=num_classes, mem_size=memSize)
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
     else:
 
         # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
-        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
+        model = attentionModel(num_classes=num_classes, mem_size=memSize)
         model.load_state_dict(torch.load(stage1_dict))
         model.train(False)
         for params in model.parameters():
@@ -140,9 +140,9 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     loss_fn = nn.CrossEntropyLoss()
 
-    optimizer_fn = torch.optim.Adam(train_params, lr=learning_rate, weight_decay=4e-5, eps=1e-4)
+    optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
 
-    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=decay_step, gamma=decay_factor)
+    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
 
     train_iter = 0
