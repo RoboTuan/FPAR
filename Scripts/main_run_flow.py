@@ -27,8 +27,7 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', outDir, dataset, 'flow') # Dir for saving models and log files
-    # Create the dir
+    model_folder = os.path.join('./', outDir, dataset, 'flow')
     if os.path.exists(model_folder):
         print('Dir {} exists!'.format(model_folder))
         sys.exit()
@@ -61,90 +60,173 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
         val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
         valInstances = vid_seq_val.__len__()
 
+
     trainInstances = vid_seq_train.__len__()
     print('Number of samples in the dataset: training = {} | validation = {}'.format(trainInstances, valInstances))
 
 
 
-    model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
-    model.train(True)
-    train_params = list(model.parameters())
+    train_params = []
+    if stage == 1:
+        
+        # DO this fo no attention, we must address it better
+        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        model.train(False)
+        for params in model.parameters():
+            params.requires_grad = False
+    else:
 
-    model.to(DEVICE)
+        # DO this fo no attention, we must address it better
+        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        model.load_state_dict(torch.load(stage1_dict))
+        model.train(False)
+        for params in model.parameters():
+            params.requires_grad = False
+        #
+        for params in model.resNet.layer4[0].conv1.parameters():
+            params.requires_grad = True
+            train_params += [params]
+
+        for params in model.resNet.layer4[0].conv2.parameters():
+            params.requires_grad = True
+            train_params += [params]
+
+        for params in model.resNet.layer4[1].conv1.parameters():
+            params.requires_grad = True
+            train_params += [params]
+
+        for params in model.resNet.layer4[1].conv2.parameters():
+            params.requires_grad = True
+            train_params += [params]
+
+        for params in model.resNet.layer4[2].conv1.parameters():
+            params.requires_grad = True
+            train_params += [params]
+        #
+        for params in model.resNet.layer4[2].conv2.parameters():
+            params.requires_grad = True
+            train_params += [params]
+        #
+        for params in model.resNet.fc.parameters():
+            params.requires_grad = True
+            train_params += [params]
+
+        model.resNet.layer4[0].conv1.train(True)
+        model.resNet.layer4[0].conv2.train(True)
+        model.resNet.layer4[1].conv1.train(True)
+        model.resNet.layer4[1].conv2.train(True)
+        model.resNet.layer4[2].conv1.train(True)
+        model.resNet.layer4[2].conv2.train(True)
+        model.resNet.fc.train(True)
+
+    for params in model.lstm_cell.parameters():
+        params.requires_grad = True
+        train_params += [params]
+
+    for params in model.classifier.parameters():
+        params.requires_grad = True
+        train_params += [params]
+
+
+    model.lstm_cell.train(True)
+
+    model.classifier.train(True)
+
+    model = model.to(DEVICE)
 
     loss_fn = nn.CrossEntropyLoss()
 
-    optimizer_fn = torch.optim.SGD(train_params, lr=lr1, momentum=0.9, weight_decay=5e-4)
+    optimizer_fn = torch.optim.Adam(train_params, lr=learning_rate, weight_decay=4e-5, eps=1e-4)
 
-    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decay_factor)
+    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=decay_step, gamma=decay_factor)
 
-    min_accuracy = 0
+
     train_iter = 0
+    min_accuracy = 0
+
 
     for epoch in range(numEpochs):
         epoch_loss = 0
         numCorrTrain = 0
         trainSamples = 0
         iterPerEpoch = 0
-        model.train(True)
+        model.lstm_cell.train(True)
+        model.classifier.train(True)
         writer.add_scalar('lr', optimizer_fn.param_groups[0]['lr'], epoch+1)
+        if stage == 2:
+            model.resNet.layer4[0].conv1.train(True)
+            model.resNet.layer4[0].conv2.train(True)
+            model.resNet.layer4[1].conv1.train(True)
+            model.resNet.layer4[1].conv2.train(True)
+            model.resNet.layer4[2].conv1.train(True)
+            model.resNet.layer4[2].conv2.train(True)
+            model.resNet.fc.train(True)
         for i, (inputs, targets) in enumerate(train_loader):
             train_iter += 1
             iterPerEpoch += 1
             optimizer_fn.zero_grad()
-            inputVariable = inputs.to(DEVICE)
-            labelVariable = targets.to(DEVICE)
+            inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).to(DEVICE))
+            labelVariable = Variable(targets.to(DEVICE))
             trainSamples += inputs.size(0)
             output_label, _ = model(inputVariable)
             loss = loss_fn(output_label, labelVariable)
             loss.backward()
             optimizer_fn.step()
             _, predicted = torch.max(output_label.data, 1)
-            numCorrTrain += (predicted == targets.cuda()).sum()
+            numCorrTrain += (predicted == targets.to(DEVICE)).sum()
+            # see if loss.item() has to be multiplied by inputs.size(0)
             epoch_loss += loss.item()
         avg_loss = epoch_loss/iterPerEpoch
-        trainAccuracy = torch.true_divide(numCorrTrain, trainSamples) * 100
-        print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch + 1, avg_loss, trainAccuracy))
+        # This is deprecated, see if the below "torch.true_divide" is correct
+        #trainAccuracy =  (numCorrTrain / trainSamples) * 100
+        trainAccuracy =  torch.true_divide(numCorrTrain, trainSamples) * 100
+        optim_scheduler.step()
+
+        print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
-        train_log_loss.write('Training loss after {} epoch = {}\n'.format(epoch+1, avg_loss))
-        train_log_acc.write('Training accuracy after {} epoch = {}\n'.format(epoch+1, trainAccuracy))
-        optim_scheduler.step()
-        
-        if valDatasetDir is not None:
+        train_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
+        train_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
+        if val_data_dir is not None:
             if (epoch+1) % 1 == 0:
                 model.train(False)
                 val_loss_epoch = 0
                 val_iter = 0
                 val_samples = 0
                 numCorr = 0
-                for j, (inputs, targets) in enumerate(val_loader):
-                    val_iter += 1
-                    val_samples += inputs.size(0)
-                    inputVariable = inputs.to(DEVICE)
-                    # MA CHE MINCHIA E' STA ROBA!!!!!!!!
-                    #labelVariable = Variable(targets.cuda(async=True), volatile=True)
-                    #vedere se "non_blockign=True" va bene
-                    labelVariable = targets.to(DEVICE, non_blocking=True)
-                    output_label, _ = model(inputVariable)
-                    val_loss = loss_fn(output_label, labelVariable)
-                    val_loss_epoch += val_loss.item()
-                    _, predicted = torch.max(output_label.data, 1)
-                    numCorr += (predicted == targets.cuda()).sum()
+                with torch.no_grad():
+                    for j, (inputs, targets) in enumerate(val_loader):
+
+                        val_iter += 1
+                        val_samples += inputs.size(0)
+                        # Deprecated
+                        #inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
+                        #labelVariable = Variable(targets.cuda(async=True), volatile=True)
+                        inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
+                        labelVariable = targets.to(DEVICE)
+                        output_label, _ = model(inputVariable)
+                        val_loss = loss_fn(output_label, labelVariable)
+                        val_loss_epoch += val_loss.item()
+                        _, predicted = torch.max(output_label.data, 1)
+                        numCorr += (predicted == targets.cuda()).sum()
+                # This is deprecated, see if the below "torch.true_divide" is correct
+                #val_accuracy = (numCorr / val_samples) * 100
                 val_accuracy = torch.true_divide(numCorr, val_samples) * 100
                 avg_val_loss = val_loss_epoch / val_iter
-                print('Validation: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch + 1, avg_val_loss, val_accuracy))
+                print('Val: Epoch = {} | Loss {} | Accuracy = {}'.format(epoch + 1, avg_val_loss, val_accuracy))
                 writer.add_scalar('val/epoch_loss', avg_val_loss, epoch + 1)
                 writer.add_scalar('val/accuracy', val_accuracy, epoch + 1)
                 val_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_val_loss))
                 val_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, val_accuracy))
                 if val_accuracy > min_accuracy:
-                    save_path_model = (model_folder + '/model_flow_state_dict.pth')
+                    save_path_model = (model_folder + '/model_rgb_state_dict.pth')
                     torch.save(model.state_dict(), save_path_model)
                     min_accuracy = val_accuracy
             else:
                 if (epoch+1) % 10 == 0:
-                    save_path_model = (model_folder + '/model_flow_state_dict_epoch' + str(epoch+1) + '.pth')
+                    save_path_model = (model_folder + '/model_rgb_state_dict_epoch' + str(epoch+1) + '.pth')
                     torch.save(model.state_dict(), save_path_model)
 
     train_log_loss.close()
@@ -155,7 +237,10 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
     writer.close()
 
 
-def __main__():
+# Renamed main
+# def __main__():
+# Added argv as input
+def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
@@ -171,7 +256,12 @@ def __main__():
     parser.add_argument('--stepSize', type=float, default=[150, 300, 500], nargs="+", help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.5, help='Learning rate decay rate')
 
-    args = parser.parse_args()
+    #args = parser.parse_args()
+
+    # Added args, _ = parser.parse_known_args() for colab parses issues
+    # THIS FIXED THE PROBLEM
+    # added argv, see input of main
+    args, _ = parser.parse_known_args(argv)
 
     dataset = args.dataset
     trainDatasetDir = args.trainDatasetDir
@@ -188,4 +278,4 @@ def __main__():
     main_run(dataset, trainDatasetDir, valDatasetDir, outDir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
              decayRate, stepSize)
 
-__main__()
+#__main__()

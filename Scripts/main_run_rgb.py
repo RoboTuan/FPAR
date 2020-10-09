@@ -70,17 +70,18 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     train_params = []
     if stage == 1:
+        
         # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
-        model = attentionModel(num_classes=num_classes, mem_size=memSize)
+        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
     else:
 
         # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
-        model = attentionModel(num_classes=num_classes, mem_size=memSize)
+        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
+        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
         model.load_state_dict(torch.load(stage1_dict))
         model.train(False)
         for params in model.parameters():
@@ -139,9 +140,9 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     loss_fn = nn.CrossEntropyLoss()
 
-    optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
+    optimizer_fn = torch.optim.Adam(train_params, lr=learning_rate, weight_decay=4e-5, eps=1e-4)
 
-    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
+    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=decay_step, gamma=decay_factor)
 
 
     train_iter = 0
@@ -188,6 +189,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
         print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
+        train_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
+        train_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
         if val_data_dir is not None:
             if (epoch+1) % 1 == 0:
                 model.train(False)
@@ -197,7 +200,6 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                 numCorr = 0
                 with torch.no_grad():
                     for j, (inputs, targets) in enumerate(val_loader):
-
                         val_iter += 1
                         val_samples += inputs.size(0)
                         # Deprecated
@@ -238,7 +240,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 # Renamed main
 # def __main__():
 # Added argv as input
-def main(argv=None):
+def __main(__argv=None):
     # Added prog='myprogram', description='Foo' for colab parses issues
     # THIS DIDN'T FIX THE PROBLEM
     parser = argparse.ArgumentParser(prog='myprogram', description='Foo')
