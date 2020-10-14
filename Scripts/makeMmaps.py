@@ -132,7 +132,7 @@ class makeDataset(Dataset):
                 j= 2*i-j #j=i+1 j-i=1 --> j=i-1
               continue
           inpSeq.append(self.spatial_transform(img.convert('RGB')))
-          mapSeq.append(self.spatial_transform2(mappa.convert('L')))
+          mapSeq.append(spatial_transform2(mappa.convert('L')))
 
         inpSeq = torch.stack(inpSeq, 0)
         mapSeq = torch.stack(mapSeq, 0)
