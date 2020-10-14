@@ -6,6 +6,14 @@ import numpy as np
 import glob
 import random
 
+from ML_DL_Project.Scripts.spatial_transform import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+                                RandomHorizontalFlip)
+
+
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
+normalize = Normalize(mean=mean, std=std)
+spatial_transform2 = Compose([Scale((7,7)), ToTensor()]) 
 
 def gen_split(root_dir, stackSize):
     Dataset = []
@@ -124,7 +132,7 @@ class makeDataset(Dataset):
                 j= 2*i-j #j=i+1 j-i=1 --> j=i-1
               continue
           inpSeq.append(self.spatial_transform(img.convert('RGB')))
-          mapSeq.append(self.spatial_transform(mappa.convert('L')))
+          mapSeq.append(self.spatial_transform2(mappa.convert('L')))
 
         inpSeq = torch.stack(inpSeq, 0)
         mapSeq = torch.stack(mapSeq, 0)
