@@ -6,7 +6,7 @@ import numpy as np
 import glob
 import random
 
-from ML_DL_Project.Scripts.spatial_transform import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
 
 
