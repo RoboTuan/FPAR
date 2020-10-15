@@ -13,12 +13,21 @@ from ML_DL_Project.Scripts.MyConvLSTMCell import *
 
 
 class attentionModel(nn.Module):
+    """
+        In this class we build the model for the standard ego-rnn project.
+        In this script are initialized the ResNet34 model, the convLSTM and the 
+        CAM and attentionMAP computations. See comments for each part. 
+    """
     def __init__(self, num_classes=61, mem_size=512):
         super(attentionModel, self).__init__()
         self.num_classes = num_classes
+        # Initialize the ResNet
         self.resNet = resnetMod.resnet34(True, True)
         self.mem_size = mem_size
+        # Get the weighs of the last fc layer of the ResNet,
+        # we need this to comput the CAM and the attentionMAP
         self.weight_softmax = self.resNet.fc.weight
+        # Initialize the convLSTM
         self.lstm_cell = MyConvLSTMCell(512, mem_size)
         self.avgpool = nn.AvgPool2d(7)
         self.dropout = nn.Dropout(0.7)
