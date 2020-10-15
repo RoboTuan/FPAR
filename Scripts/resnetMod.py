@@ -169,6 +169,7 @@ class ResNet(nn.Module):
 
         # Debugging print to see if this avgpoll is a GAP
         print(x.size())
+        print(conv_layer4BN.size())
         x = self.avgpool(conv_layer4BN)
         print(x.size())
         x = x.view(x.size(0), -1)
