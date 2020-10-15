@@ -1,6 +1,6 @@
 from __future__ import print_function, division
-# This is without attention, we must address this better
-#from ML_DL_Project.Scripts.convLSTMmodel import *
+# This is without attention
+from ML_DL_Project.Scripts.convLSTMmodel import *
 from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
 from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
@@ -11,7 +11,7 @@ import sys
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize):
+             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, attention):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -71,9 +71,13 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_params = []
     if stage == 1:
         
-        # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
-        model = attentionModel(num_classes=num_classes, mem_size=memSize)
+        
+        if attention==True:
+            model = attentionModel(num_classes=num_classes, mem_size=memSize)
+        else:
+            # DO this if no attention
+            model = clstm_Model(num_classes=num_classes, mem_size=memSize)
+
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
@@ -262,6 +266,9 @@ def __main__(argv=None):
     parser.add_argument('--stepSize', type=float, default=[25, 75, 150], nargs="+", help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
+    #added argument for attention
+    parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
+
 
     #args = parser.parse_args()
 
@@ -284,9 +291,10 @@ def __main__(argv=None):
     stepSize = args.stepSize
     decayRate = args.decayRate
     memSize = args.memSize
+    attention = args.attention
 
     main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize)
+             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, attention)
 
 # Don't run it automatically for colab
 #__main__()

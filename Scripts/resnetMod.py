@@ -168,10 +168,13 @@ class ResNet(nn.Module):
             conv_layer4BN = self.layer4(x)
 
         # Debugging print to see if this avgpoll is a GAP
-        print(x.size())
-        print(conv_layer4BN.size())
+        # Yes, it's a GAP, because:
+        # conv_layer4BN.size() is equal to [32, 512, 7, 7]
+        # and the avgpool is performed with a kernel of 7x7,
+        #print(conv_layer4BN.size())
         x = self.avgpool(conv_layer4BN)
-        print(x.size())
+        # x.size() after the GAP is equal to  [32, 512, 1, 1] as expected
+        #print(x.size())
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         if self.noBN:

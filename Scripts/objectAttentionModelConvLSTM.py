@@ -29,8 +29,10 @@ class attentionModel(nn.Module):
         self.weight_softmax = self.resNet.fc.weight
         # Initialize the convLSTM
         self.lstm_cell = MyConvLSTMCell(512, mem_size)
+        # Here I initialize another avgpool needed after the convLSTM
         self.avgpool = nn.AvgPool2d(7)
         self.dropout = nn.Dropout(0.7)
+        # Here I initialize the last classifier
         self.fc = nn.Linear(mem_size, self.num_classes)
         self.classifier = nn.Sequential(self.dropout, self.fc)
 
@@ -43,10 +45,25 @@ class attentionModel(nn.Module):
             feature_conv1 = feature_conv.view(bz, nc, h*w)
             probs, idxs = logit.sort(1, True)
             class_idx = idxs[:, 0]
+            # Here the CAM is computed
+            # bmm is the batch matrix-matrix product, example:
+                # pay attention that in pytorch this convention is followed in tensors -> [N, C, H, W]
+                # that means [Batch_size, channels (depth), height, width],
+                # if I multiply 2 tensors with respectively dimensions [10, 3, 20, 10] and [10, 3, 10, 30]
+                # I will get with bmm a result tensor of dimensino [10, 3, 20, 30] (the number of colums of the first
+                # matrix is equal to the number of rows of the second one, considering only H and W. If I change the order of 
+                # the tensors in bmm I will have different results or errors).
+            # the self.weight_softmax are basically the weights of the last classifier of the ResNet.
+            # In the ResNet implementation of Pytorch, we don't find the softmax because 
+            # it's trained with a cross entropy loss. In Pytorch, this criterion combines nn.LogSoftmax() 
+            # and nn.NLLLoss() in one single class (consists of nn.LogSoftmax and then nn.NLLLoss). 
             cam = torch.bmm(self.weight_softmax[class_idx].unsqueeze(1), feature_conv1)
+            # To compute the attentionMAP (check paper), first we pass the CAM though a softmax
+            # and then we multiply this result by the feature_convNBN
             attentionMAP = F.softmax(cam.squeeze(1), dim=1)
             attentionMAP = attentionMAP.view(attentionMAP.size(0), 1, 7, 7)
             attentionFeat = feature_convNBN * attentionMAP.expand_as(feature_conv)
+            #convLSTM
             state = self.lstm_cell(attentionFeat, state)
         feats1 = self.avgpool(state[1]).view(state[1].size(0), -1)
         feats = self.classifier(feats1)
