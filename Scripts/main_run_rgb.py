@@ -28,7 +28,14 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', out_dir, dataset, 'rgb', 'stage'+str(stage))  # Dir for saving models and log files
+    if attention==True:
+        model_folder = os.path.join('./', out_dir, dataset, 'rgb', 'stage'+str(stage))  # Dir for saving models and log files
+    else:
+        # DO this if no attention
+        # TODO:
+        # check if it's correct
+        model_folder = os.path.join('./', out_dir, dataset, 'rgb_noAttention', 'stage'+str(stage))  # Dir for saving models and log files
+
     # Create the dir
     # TODO:
     # see if is necessary other if as in colab

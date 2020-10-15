@@ -55,7 +55,7 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
     if valDatasetDir is not None:
 
         vid_seq_val = makeDatasetFlow(valDatasetDir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
-                                    sequence=False, stackSize=stackSize, fmt='.jpg', phase='Test')
+                                    sequence=False, stackSize=stackSize, fmt='.png', phase='Test')
 
         val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
         valInstances = vid_seq_val.__len__()

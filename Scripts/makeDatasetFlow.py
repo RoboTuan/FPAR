@@ -38,7 +38,7 @@ def gen_split(root_dir, stackSize):
 
 class makeDatasetFlow(Dataset):
     def __init__(self, root_dir, spatial_transform=None, sequence=False, stackSize=5,
-                 train=True, numSeg = 1, fmt='.jpg', phase='train'):
+                 train=True, numSeg = 1, fmt='.png', phase='train'):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -73,11 +73,11 @@ class makeDatasetFlow(Dataset):
                 inpSeq = []
                 for k in range(self.stackSize):
                     i = k + int(startFrame)
-                    fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + '.png'
+                    fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + self.fmt
                     img = Image.open(fl_name)
                     inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True))
                     # fl_names.append(fl_name)
-                    fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + '.png'
+                    fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + self.fmt
                     img = Image.open(fl_name)
                     inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
                 inpSeqSegs.append(torch.stack(inpSeq, 0).squeeze())
@@ -94,11 +94,11 @@ class makeDatasetFlow(Dataset):
             inpSeq = []
             for k in range(self.stackSize):
                 i = k + int(startFrame)
-                fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + '.png'
+                fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + self.fmt
                 img = Image.open(fl_name)
                 inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True))
                 # fl_names.append(fl_name)
-                fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + '.png'
+                fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + self.fmt
                 img = Image.open(fl_name)
                 inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
             inpSeqSegs = torch.stack(inpSeq, 0).squeeze(1)
