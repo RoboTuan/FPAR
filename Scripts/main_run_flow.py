@@ -66,174 +66,96 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
 
 
 
-    train_params = []
-    if stage == 1:
-        
-        # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
-        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
-        model.train(False)
-        for params in model.parameters():
-            params.requires_grad = False
-    else:
+    model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
+    model.train(True)
+    train_params = list(model.parameters())
 
-        # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
-        model = attentionModel(num_classes=NUM_CLASSES, mem_size=MEMSIZE)
-        model.load_state_dict(torch.load(stage1_dict))
-        model.train(False)
-        for params in model.parameters():
-            params.requires_grad = False
-        #
-        for params in model.resNet.layer4[0].conv1.parameters():
-            params.requires_grad = True
-            train_params += [params]
-
-        for params in model.resNet.layer4[0].conv2.parameters():
-            params.requires_grad = True
-            train_params += [params]
-
-        for params in model.resNet.layer4[1].conv1.parameters():
-            params.requires_grad = True
-            train_params += [params]
-
-        for params in model.resNet.layer4[1].conv2.parameters():
-            params.requires_grad = True
-            train_params += [params]
-
-        for params in model.resNet.layer4[2].conv1.parameters():
-            params.requires_grad = True
-            train_params += [params]
-        #
-        for params in model.resNet.layer4[2].conv2.parameters():
-            params.requires_grad = True
-            train_params += [params]
-        #
-        for params in model.resNet.fc.parameters():
-            params.requires_grad = True
-            train_params += [params]
-
-        model.resNet.layer4[0].conv1.train(True)
-        model.resNet.layer4[0].conv2.train(True)
-        model.resNet.layer4[1].conv1.train(True)
-        model.resNet.layer4[1].conv2.train(True)
-        model.resNet.layer4[2].conv1.train(True)
-        model.resNet.layer4[2].conv2.train(True)
-        model.resNet.fc.train(True)
-
-    for params in model.lstm_cell.parameters():
-        params.requires_grad = True
-        train_params += [params]
-
-    for params in model.classifier.parameters():
-        params.requires_grad = True
-        train_params += [params]
-
-
-    model.lstm_cell.train(True)
-
-    model.classifier.train(True)
-
-    model = model.to(DEVICE)
+    model.to(DEVICE)
 
     loss_fn = nn.CrossEntropyLoss()
 
-    optimizer_fn = torch.optim.Adam(train_params, lr=learning_rate, weight_decay=4e-5, eps=1e-4)
+    optimizer_fn = torch.optim.SGD(train_params, lr=lr1, momentum=0.9, weight_decay=5e-4)
 
-    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=decay_step, gamma=decay_factor)
+    optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
-
-    train_iter = 0
     min_accuracy = 0
-
+    train_iter = 0
 
     for epoch in range(numEpochs):
         epoch_loss = 0
         numCorrTrain = 0
         trainSamples = 0
         iterPerEpoch = 0
-        model.lstm_cell.train(True)
-        model.classifier.train(True)
+        model.train(True)
         writer.add_scalar('lr', optimizer_fn.param_groups[0]['lr'], epoch+1)
-        if stage == 2:
-            model.resNet.layer4[0].conv1.train(True)
-            model.resNet.layer4[0].conv2.train(True)
-            model.resNet.layer4[1].conv1.train(True)
-            model.resNet.layer4[1].conv2.train(True)
-            model.resNet.layer4[2].conv1.train(True)
-            model.resNet.layer4[2].conv2.train(True)
-            model.resNet.fc.train(True)
         for i, (inputs, targets) in enumerate(train_loader):
             train_iter += 1
             iterPerEpoch += 1
             optimizer_fn.zero_grad()
-            inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).to(DEVICE))
-            labelVariable = Variable(targets.to(DEVICE))
+            inputVariable = inputs.to(DEVICE)
+            labelVariable = targets.to(DEVICE)
             trainSamples += inputs.size(0)
             output_label, _ = model(inputVariable)
             loss = loss_fn(output_label, labelVariable)
             loss.backward()
             optimizer_fn.step()
             _, predicted = torch.max(output_label.data, 1)
-            numCorrTrain += (predicted == targets.to(DEVICE)).sum()
-            # see if loss.item() has to be multiplied by inputs.size(0)
+            numCorrTrain += (predicted == targets.cuda()).sum()
             epoch_loss += loss.item()
         avg_loss = epoch_loss/iterPerEpoch
-        # This is deprecated, see if the below "torch.true_divide" is correct
-        #trainAccuracy =  (numCorrTrain / trainSamples) * 100
-        trainAccuracy =  torch.true_divide(numCorrTrain, trainSamples) * 100
-        optim_scheduler.step()
-
-        print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
+        trainAccuracy = torch.true_divide(numCorrTrain, trainSamples) * 100
+        print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch + 1, avg_loss, trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
-        train_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
-        train_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
-        if val_data_dir is not None:
+        train_log_loss.write('Training loss after {} epoch = {}\n'.format(epoch+1, avg_loss))
+        train_log_acc.write('Training accuracy after {} epoch = {}\n'.format(epoch+1, trainAccuracy))
+        optim_scheduler.step()
+        
+        if valDatasetDir is not None:
             if (epoch+1) % 1 == 0:
                 model.train(False)
                 val_loss_epoch = 0
                 val_iter = 0
                 val_samples = 0
                 numCorr = 0
+                # wrapping with torch.no_grad() because
+                # volatile keyword is deprecated, check is it's correct
                 with torch.no_grad():
                     for j, (inputs, targets) in enumerate(val_loader):
-
                         val_iter += 1
                         val_samples += inputs.size(0)
-                        # Deprecated
-                        #inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
+                        inputVariable = inputs.to(DEVICE)
+                        #inputVariable = Variable(inputs.cuda(), volatile=True)
                         #labelVariable = Variable(targets.cuda(async=True), volatile=True)
-                        inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
-                        labelVariable = targets.to(DEVICE)
+                        #vedere se "non_blockign=True" va bene
+                        labelVariable = targets.to(DEVICE, non_blocking=True)
                         output_label, _ = model(inputVariable)
                         val_loss = loss_fn(output_label, labelVariable)
                         val_loss_epoch += val_loss.item()
                         _, predicted = torch.max(output_label.data, 1)
                         numCorr += (predicted == targets.cuda()).sum()
-                # This is deprecated, see if the below "torch.true_divide" is correct
-                #val_accuracy = (numCorr / val_samples) * 100
                 val_accuracy = torch.true_divide(numCorr, val_samples) * 100
                 avg_val_loss = val_loss_epoch / val_iter
-                print('Val: Epoch = {} | Loss {} | Accuracy = {}'.format(epoch + 1, avg_val_loss, val_accuracy))
+                print('Validation: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch + 1, avg_val_loss, val_accuracy))
                 writer.add_scalar('val/epoch_loss', avg_val_loss, epoch + 1)
                 writer.add_scalar('val/accuracy', val_accuracy, epoch + 1)
                 val_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_val_loss))
                 val_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, val_accuracy))
                 if val_accuracy > min_accuracy:
-                    save_path_model = (model_folder + '/model_rgb_state_dict.pth')
+                    save_path_model = (model_folder + '/model_flow_state_dict.pth')
                     torch.save(model.state_dict(), save_path_model)
                     min_accuracy = val_accuracy
             else:
                 if (epoch+1) % 10 == 0:
-                    save_path_model = (model_folder + '/model_rgb_state_dict_epoch' + str(epoch+1) + '.pth')
+                    save_path_model = (model_folder + '/model_flow_state_dict_epoch' + str(epoch+1) + '.pth')
                     torch.save(model.state_dict(), save_path_model)
 
     train_log_loss.close()
     train_log_acc.close()
     val_log_acc.close()
     val_log_loss.close()
-    writer.export_scalars_to_json(model_folder + "/all_scalars.json")
+    #writer.export_scalars_to_json(model_folder + "/all_scalars.json")
+    writer.flush()
     writer.close()
 
 
