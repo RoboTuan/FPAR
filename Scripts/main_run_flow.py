@@ -9,7 +9,7 @@ from ML_DL_Project.Scripts.makeDatasetFlow import *
 import argparse
 import sys
 
-def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
+def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
              decayRate, stepSize):
 
 
@@ -28,7 +28,7 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', outDir, dataset, 'flow')
+    model_folder = os.path.join('./', out_dir, dataset, 'flow')
     if os.path.exists(model_folder):
         print('Dir {} exists!'.format(model_folder))
         sys.exit()
@@ -48,14 +48,14 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
     spatial_transform = Compose([Scale(256), RandomHorizontalFlip(), MultiScaleCornerCrop([1, 0.875, 0.75, 0.65625], 224),
                                 ToTensor(), normalize])
 
-    vid_seq_train = makeDatasetFlow(trainDatasetDir, spatial_transform=spatial_transform, sequence=False,
+    vid_seq_train = makeDatasetFlow(train_data_dir, spatial_transform=spatial_transform, sequence=False,
                                 stackSize=stackSize, fmt='.png')
 
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
                             shuffle=True, sampler=None, num_workers=4, pin_memory=True)
-    if valDatasetDir is not None:
+    if val_data_dir is not None:
 
-        vid_seq_val = makeDatasetFlow(valDatasetDir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
+        vid_seq_val = makeDatasetFlow(val_data_dir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
                                     sequence=False, stackSize=stackSize, fmt='.png', phase='Test')
 
         val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
@@ -112,7 +112,7 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
         train_log_acc.write('Training accuracy after {} epoch = {}\n'.format(epoch+1, trainAccuracy))
         optim_scheduler.step()
         
-        if valDatasetDir is not None:
+        if val_data_dir is not None:
             if (epoch+1) % 1 == 0:
                 model.train(False)
                 val_loss_epoch = 0
