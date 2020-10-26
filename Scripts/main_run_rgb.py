@@ -253,8 +253,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     writer.flush()
     writer.close()
 
-# Renamed main
-# def __main__():
+
 # Added argv as input
 def __main__(argv=None):
     # Added prog='myprogram', description='Foo' for colab parses issues

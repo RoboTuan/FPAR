@@ -4,6 +4,7 @@ from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterC
                                 RandomHorizontalFlip)
 import torch.nn as nn
 from torch.autograd import Variable
+from torch.utils.tensorboard import SummaryWriter
 from ML_DL_Project.Scripts.makeDatasetFlow import *
 import argparse
 import sys
@@ -159,10 +160,9 @@ def main_run(dataset, trainDir, valDir, outDir, stackSize, trainBatchSize, valBa
     writer.close()
 
 
-# Renamed main
-# def __main__():
+
 # Added argv as input
-def main(argv=None):
+def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
