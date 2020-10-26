@@ -144,8 +144,6 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
         for j, (inputFlow, inputFrame, targets) in enumerate(train_loader):
             train_iter += 1
             iterPerEpoch += 1
-            # YOLO CAZZOOO!!!!!
-            # ZERO FUCKS GIVEN!!!!!!!!!!!!!
             optimizer_fn.zero_grad()
             inputVariableFlow = inputFlow.to(DEVICE)
             inputVariableFrame = inputFrame.permute(1, 0, 2, 3, 4).to(DEVICE)
@@ -207,10 +205,11 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
     val_log_acc.close()
     val_log_loss.close()
     #writer.export_scalars_to_json(model_folder + "/all_scalars.json")
+    writer.flush()
     writer.close()
 
 
-def __main__():
+def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--flowModel', type=str, default='./experiments/gtea61/flow/best_model_state_dict.pth',
@@ -232,7 +231,7 @@ def __main__():
     parser.add_argument('--decayRate', type=float, default=0.99, help='Learning rate decay rate')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
 
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args(argv)
 
     dataset = args.dataset
     flowModel = args.flowModel
