@@ -252,5 +252,3 @@ def __main__(argv=None):
 
     main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
              trainBatchSize, valBatchSize, lr1, numEpochs, stepSize, decayRate)
-
-__main__()
