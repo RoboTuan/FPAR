@@ -90,9 +90,13 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             params.requires_grad = False
     else:
 
-        # DO this fo no attention, we must address it better
-        #model = clstm_Model(num_classes=num_classes, mem_size=memSize)
-        model = attentionModel(num_classes=num_classes, mem_size=memSize)
+        if attention==True:
+            model = attentionModel(num_classes=num_classes, mem_size=memSize)
+        else:
+            # DO this fo no attention, we must address it better
+            model = clstm_Model(num_classes=num_classes, mem_size=memSize)
+
+
         model.load_state_dict(torch.load(stage1_dict))
         model.train(False)
         for params in model.parameters():
