@@ -5,6 +5,7 @@ import torch.nn as nn
 from ML_DL_Project.Scripts.twoStreamModel import *
 from torch.autograd import Variable
 from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.tensorboard import SummaryWriter
 from ML_DL_Project.Scripts.makeDatasetTwoStream import *
 import argparse
 
