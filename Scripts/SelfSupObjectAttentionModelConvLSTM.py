@@ -35,7 +35,8 @@ class SelfSupAttentionModel(nn.Module):
         self.classifier = nn.Sequential(self.dropout, self.fc)
 
 
-        #Secondary task branch
+        #Secondary, self-supervised, task branch
+        #Relu+conv+flatten+fullyconnected to get a 2*7*7 = 96 length 
         self.mmapPredictor = nn.Sequential()
         self.mmapPredictor.add_module('mmap_relu',nn.ReLU(True))
         self.mmapPredictor.add_module('convolution', nn.Conv2d(512, 100, kernel_size=1))
@@ -46,11 +47,15 @@ class SelfSupAttentionModel(nn.Module):
 
 
     def forward(self, inputVariable):
+        # Initialize states for the convolutional lstm cell
         state = (Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()),
                  Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()))
 
+        # Iterate over temporally sequential images
         for t in range(inputVariable.size(0)):
 
+            # Pass the image to the resnet and get back the featuremap at the end of the resnet in "logit"
+            # get returned in feature_conv and feature_convNBN the features map of the 4th layer of the resnet
             logit, feature_conv, feature_convNBN = self.resNet(inputVariable[t])
             bz, nc, h, w = feature_conv.size()
             feature_conv1 = feature_conv.view(bz, nc, h*w)
@@ -63,10 +68,16 @@ class SelfSupAttentionModel(nn.Module):
             attentionMAP = attentionMAP.view(attentionMAP.size(0), 1, 7, 7)
             attentionFeat = feature_convNBN * attentionMAP.expand_as(feature_conv)
 
-            #Prediction of the mmap
+            # Prediction of the mmap
+            # SelfSupervised task
+            # Gget a copy of the resnet 4th layer feature map
             feature_conv2 = feature_conv.clone()
+            # If is the first image of the temporal sequence create a new feature map vector and
+            # put the output of the selfsupervised net with the copy of before in it
             if t == 0:
               map_predictions = self.mmapPredictor(feature_conv2)
+            
+            # Otherwise if is not the first image simply concatenate along dim=0 the output of the selfsup net
             else:
               prediction = self.mmapPredictor(feature_conv2) #This can be feature_conv
               map_predictions = torch.cat([map_predictions,prediction],dim=0)
@@ -75,4 +86,6 @@ class SelfSupAttentionModel(nn.Module):
 
         feats1 = self.avgpool(state[1]).view(state[1].size(0), -1)
         feats = self.classifier(feats1)
+        # In the end return the feature maps of the conv lstm cell and
+        # the motionmap predictions obtained by the selfsupervised task 
         return feats, feats1, map_predictions

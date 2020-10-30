@@ -37,11 +37,17 @@ class attentionModel(nn.Module):
         self.classifier = nn.Sequential(self.dropout, self.fc)
 
     def forward(self, inputVariable):
+        # Initialize states for the convolutional lstm cell
         state = (Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()),
                  Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()))
+        # Iterate over temporally sequential images 
         for t in range(inputVariable.size(0)):
+            # The logits are the result of the last layer of the cnn (the raw ouput) without softmax
+            # Pass the image to the resnet and get back the featuremap at the end of the resnet in "logit"
+            # get returned in feature_conv and feature_convNBN the features map of the 4th layer of the resnet
             logit, feature_conv, feature_convNBN = self.resNet(inputVariable[t])
             bz, nc, h, w = feature_conv.size()
+            # Fescale feature conv from (bz,nc,h,w) to (bz,nc,h*w)
             feature_conv1 = feature_conv.view(bz, nc, h*w)
             probs, idxs = logit.sort(1, True)
             class_idx = idxs[:, 0]
@@ -50,7 +56,7 @@ class attentionModel(nn.Module):
                 # pay attention that in pytorch this convention is followed in tensors -> [N, C, H, W]
                 # that means [Batch_size, channels (depth), height, width],
                 # if I multiply 2 tensors with respectively dimensions [10, 3, 20, 10] and [10, 3, 10, 30]
-                # I will get with bmm a result tensor of dimensino [10, 3, 20, 30] (the number of colums of the first
+                # I will get with bmm a result tensor of dimension [10, 3, 20, 30] (the number of colums of the first
                 # matrix is equal to the number of rows of the second one, considering only H and W. If I change the order of 
                 # the tensors in bmm I will have different results or errors).
             # the self.weight_softmax are basically the weights of the last classifier of the ResNet.
