@@ -119,7 +119,7 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
                 val_iter = 0
                 val_samples = 0
                 numCorr = 0
-                # wrapping with torch.no_grad() because
+                # wrapping with torch.no_grad() because it wasn't present, see issuea with volatie=True
                 # volatile keyword is deprecated, check is it's correct
                 with torch.no_grad():
                     for j, (inputs, targets) in enumerate(val_loader):

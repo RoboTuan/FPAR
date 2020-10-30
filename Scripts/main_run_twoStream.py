@@ -175,16 +175,19 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
                 val_loss_epoch = 0
                 val_iter = 0
                 numCorr = 0
-                for j, (inputFlow, inputFrame, targets) in enumerate(val_loader):
-                    val_iter += 1
-                    inputVariableFlow = inputFlow.to(DEVICE)
-                    inputVariableFrame = inputFrame.permute(1, 0, 2, 3, 4).to(DEVICE)
-                    labelVariable = targets.to(DEVICE)
-                    output_label = model(inputVariableFlow, inputVariableFrame)
-                    loss = loss_fn(F.log_softmax(output_label, dim=1), labelVariable)
-                    val_loss_epoch += loss.item()
-                    _, predicted = torch.max(output_label.data, 1)
-                    numCorr += (predicted == labelVariable.data).sum()
+                # wrapping with torch.no_grad() because it wasn't present
+                # check if it makes sense
+                with torch.no_grad():
+                    for j, (inputFlow, inputFrame, targets) in enumerate(val_loader):
+                        val_iter += 1
+                        inputVariableFlow = inputFlow.to(DEVICE)
+                        inputVariableFrame = inputFrame.permute(1, 0, 2, 3, 4).to(DEVICE)
+                        labelVariable = targets.to(DEVICE)
+                        output_label = model(inputVariableFlow, inputVariableFrame)
+                        loss = loss_fn(F.log_softmax(output_label, dim=1), labelVariable)
+                        val_loss_epoch += loss.item()
+                        _, predicted = torch.max(output_label.data, 1)
+                        numCorr += (predicted == labelVariable.data).sum()
                 val_accuracy = torch.true_divide(numCorr, valSamples) * 100
                 avg_val_loss = val_loss_epoch / val_iter
                 print('Val Loss after {} epochs, loss = {}'.format(epoch + 1, avg_val_loss))
