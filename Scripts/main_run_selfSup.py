@@ -74,24 +74,14 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_params = []
     if stage == 1:
         
-        
-        if attention==True:
-            model = attentionModel(num_classes=num_classes, mem_size=memSize)
-        else:
-            # DO this if no attention
-            model = clstm_Model(num_classes=num_classes, mem_size=memSize)
-
+        model = SelfSupObjectAttentionModelConvLSTM(num_classes=num_classes, mem_size=memSize)
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
+
     else:
 
-        if attention==True:
-            model = attentionModel(num_classes=num_classes, mem_size=memSize)
-        else:
-            # DO this fo no attention, we must address it better
-            model = clstm_Model(num_classes=num_classes, mem_size=memSize)
-
+        model = SelfSupObjectAttentionModelConvLSTM(num_classes=num_classes, mem_size=memSize)
 
         model.load_state_dict(torch.load(stage1_dict))
         model.train(False)
@@ -155,6 +145,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
+    # Debug
+    print(model)
 
     train_iter = 0
     min_accuracy = 0
