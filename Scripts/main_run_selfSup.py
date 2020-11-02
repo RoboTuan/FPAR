@@ -11,9 +11,9 @@ import argparse
 import sys
 
 
-def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, attention):
-    
+def main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha):
+
     if dataset == 'gtea61':
         num_classes = 61
     elif dataset == 'gtea71':
@@ -54,7 +54,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                                 ToTensor(), 
                                 normalize])
 
-    vid_seq_train = makeDataset(train_data_dir, spatial_transform=spatial_transform, seqLen=seqLen, fmt='.png')
+    vid_seq_train = makeDataset(train_data_dir, spatial_transform=spatial_transform, stackSize=stackSize, seqLen=seqLen, fmt='.png')
 
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize, shuffle=True, num_workers=4, pin_memory=True)
 
@@ -63,7 +63,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                                                                             CenterCrop(224),
                                                                             ToTensor(),
                                                                             normalize]),
-                                    seqLen=seqLen, fmt='.png')
+                                    seqLen=seqLen, stackSize=stackSize, fmt='.png')
 
     val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
     valInstances = vid_seq_val.__len__()
@@ -140,6 +140,9 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     model = model.to(DEVICE)
 
     loss_fn = nn.CrossEntropyLoss()
+    # address this to make a loss also for regression with a flag
+    #loss_selfSup = 
+
 
     optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
 
@@ -150,9 +153,10 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     train_iter = 0
     min_accuracy = 0
-
+    
     for epoch in range(numEpochs):
         epoch_loss = 0
+        mmap_loss = 0
         numCorrTrain = 0
         trainSamples = 0
         iterPerEpoch = 0
@@ -167,41 +171,65 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             model.resNet.layer4[2].conv1.train(True)
             model.resNet.layer4[2].conv2.train(True)
             model.resNet.fc.train(True)
-        for i, (inputs, targets) in enumerate(train_loader):
+        # Change for cycle
+        #for i, (inputs, targets) in enumerate(train_loader):
+        for inputs, inputMmap, targets in train_loader:
             train_iter += 1
             iterPerEpoch += 1
             optimizer_fn.zero_grad()
+            # Add  inpuMmap to device
+            inputMmap = inputMmap.to(DEVICE)
+
             inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).to(DEVICE))
             labelVariable = Variable(targets.to(DEVICE))
             trainSamples += inputs.size(0)
-            output_label, _ = model(inputVariable)
+
+            output_label, _, mmapPrediction = model(inputVariable)
+
+            mmapPrediction = mmapPrediction.view(-1)
+            inputMmap = torch.reshape(inputMmap, (-1,)).float()
+
+            # Weighting the loss of the seflSup task by multiplying it by alpha
+            loss2 = alpha*loss_fn(mmapPrediction,inputMmap)
             loss = loss_fn(output_label, labelVariable)
-            loss.backward()
+
+            total_loss = loss  + loss2
+            total_loss.backward()
+
             optimizer_fn.step()
             _, predicted = torch.max(output_label.data, 1)
             numCorrTrain += (predicted == targets.to(DEVICE)).sum()
             # see if loss.item() has to be multiplied by inputs.size(0)
+            mmap_loss += loss2.item()
             epoch_loss += loss.item()
+
         avg_loss = epoch_loss/iterPerEpoch
+        avg_mmap_loss = mmap_loss/iterPerEpoch
         # This is deprecated, see if the below "torch.true_divide" is correct
         #trainAccuracy =  (numCorrTrain / trainSamples) * 100
-        trainAccuracy =  torch.true_divide(numCorrTrain, trainSamples) * 100
+        trainAccuracy = torch.true_divide(numCorrTrain, trainSamples) * 100
         optim_scheduler.step()
 
+        # Vedere se bisogna cambiare il print per la mappa
         print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
+        print('Mmap loss after {} epoch = {}% '.format(epoch + 1, avg_mmap_loss))
+
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
-        train_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
-        train_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
+        writer.add_scalar('mmap_train_loss',avg_mmap_loss,epoch+1)
+        train_log_loss.write('Train Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
+        train_log_acc.write('Train Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
+        train_log_loss.write('Train mmap loss after {} epoch= {}'.format(epoch+1,avg_mmap_loss))
         if val_data_dir is not None:
             if (epoch+1) % 1 == 0:
                 model.train(False)
                 val_loss_epoch = 0
+                val_mmap_loss = 0
                 val_iter = 0
                 val_samples = 0
                 numCorr = 0
                 with torch.no_grad():
-                    for j, (inputs, targets) in enumerate(val_loader):
+                    for inputs, inputMmap, targets in val_loader:
                         val_iter += 1
                         val_samples += inputs.size(0)
                         # Deprecated
@@ -210,26 +238,41 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                         inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
                         labelVariable = targets.to(DEVICE)
                         output_label, _ = model(inputVariable)
+
+                        mmapPrediction = mmapPrediction.view(-1,2)
+                        inputMmap = torch.reshape(inputMmap, (-1,))
+                        inputMmap = torch.round(inputMmap).long()
+                        loss2 = alpha*loss_fn(mmapPrediction,inputMmap)
+
                         val_loss = loss_fn(output_label, labelVariable)
                         val_loss_epoch += val_loss.item()
+                        val_mmap_loss += loss2.item()
+
                         _, predicted = torch.max(output_label.data, 1)
                         numCorr += (predicted == targets.cuda()).sum()
                 # This is deprecated, see if the below "torch.true_divide" is correct
                 #val_accuracy = (numCorr / val_samples) * 100
                 val_accuracy = torch.true_divide(numCorr, val_samples) * 100
                 avg_val_loss = val_loss_epoch / val_iter
+                avg_mmap_val_loss = val_mmap_loss / val_iter
+
                 print('Val: Epoch = {} | Loss {} | Accuracy = {}'.format(epoch + 1, avg_val_loss, val_accuracy))
+                # Vedere se cambiare questo print
+                print('Val MMap Loss after {} epochs, loss = {}'.format(epoch + 1, avg_mmap_val_loss))
                 writer.add_scalar('val/epoch_loss', avg_val_loss, epoch + 1)
                 writer.add_scalar('val/accuracy', val_accuracy, epoch + 1)
+                writer.add_scalar('val mmap/epoch_loss', avg_mmap_val_loss, epoch + 1)
                 val_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_val_loss))
                 val_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, val_accuracy))
+                val_log_loss.write('Val MMap Loss after {} epochs = {}\n'.format(epoch + 1, avg_mmap_val_loss))
+
                 if val_accuracy > min_accuracy:
-                    save_path_model = (model_folder + '/model_rgb_state_dict.pth')
+                    save_path_model = (model_folder + '/model_selfSup_state_dict.pth')
                     torch.save(model.state_dict(), save_path_model)
                     min_accuracy = val_accuracy
             else:
                 if (epoch+1) % 10 == 0:
-                    save_path_model = (model_folder + '/model_rgb_state_dict_epoch' + str(epoch+1) + '.pth')
+                    save_path_model = (model_folder + '/model_selfSup_state_dict_epoch' + str(epoch+1) + '.pth')
                     torch.save(model.state_dict(), save_path_model)
 
     train_log_loss.close()
@@ -262,9 +305,11 @@ def __main__(argv=None):
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--stepSize', type=float, default=[25, 75, 150], nargs="+", help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
+    parser.add_argument('--stackSize', type=int, default=5, help='Number of opticl flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
     #added argument for attention
     parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
+    parser.add_argument('--alpha', type=float, default=1, help='Weight for the self supervised task')
 
 
     #args = parser.parse_args()
@@ -286,9 +331,10 @@ def __main__(argv=None):
     numEpochs = args.numEpochs
     lr1 = args.lr
     stepSize = args.stepSize
+    stackSize = args.stackSize
     decayRate = args.decayRate
     memSize = args.memSize
-    attention = args.attention
+    alpha = args.alpha
 
     main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, attention)
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha)

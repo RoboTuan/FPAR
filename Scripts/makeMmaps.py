@@ -80,9 +80,9 @@ def gen_split(root_dir, stackSize):
 
 class makeDataset(Dataset):
     def __init__(self, root_dir, spatial_transform=None, seqLen=20,
-                 train=True, mulSeg=False, numSeg=1, fmt='.png'):
+                 train=True, stackSize=5, mulSeg=False, numSeg=1, fmt='.png'):
 
-        self.images, self.maps, self.labels, self.numFrames, self.numMapFrames = gen_split(root_dir, 5)
+        self.images, self.maps, self.labels, self.numFrames, self.numMapFrames = gen_split(root_dir, stackSize)
         self.spatial_transform = spatial_transform
         self.train = train
         self.mulSeg = mulSeg
