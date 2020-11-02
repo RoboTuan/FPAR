@@ -23,7 +23,7 @@ class Flatten(nn.Module):
 
 class RegSelfSupAttentionModel(nn.Module):
     def __init__(self, num_classes=61, mem_size=512):
-        super(SelfSupAttentionModel, self).__init__()
+        super(RegSelfSupAttentionModel, self).__init__()
         self.num_classes = num_classes
         self.resNet = resnetMod.resnet34(True, True)
         self.mem_size = mem_size
