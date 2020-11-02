@@ -21,7 +21,7 @@ class Flatten(nn.Module):
         return input.view(input.size(0), -1)
 
 
-class SelfSupAttentionModel(nn.Module):
+class RegSelfSupAttentionModel(nn.Module):
     def __init__(self, num_classes=61, mem_size=512):
         super(SelfSupAttentionModel, self).__init__()
         self.num_classes = num_classes
