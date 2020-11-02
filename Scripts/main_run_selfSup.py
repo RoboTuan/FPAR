@@ -11,7 +11,7 @@ import argparse
 import sys
 
 
-def main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
+def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
              valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha):
 
     if dataset == 'gtea61':
@@ -29,7 +29,7 @@ def main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir,
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', outDir, dataset, 'selfSup', 'stage'+str(stage))  # Dir for saving models and log files
+    model_folder = os.path.join('./', out_dir, dataset, 'selfSup', 'stage'+str(stage))  # Dir for saving models and log files
     # Create the dir
     # TODO:
     # see if is necessary other if as in colab
