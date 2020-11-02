@@ -239,7 +239,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                         #labelVariable = Variable(targets.cuda(async=True), volatile=True)
                         inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
                         labelVariable = targets.to(DEVICE)
-                        output_label, _ = model(inputVariable)
+                        inputMmap = inputMmap.to(DEVICE)
+                        output_label, _ , mmapPrediction = model(inputVariable)
 
                         mmapPrediction = mmapPrediction.view(-1,2)
                         inputMmap = torch.reshape(inputMmap, (-1,))
