@@ -186,7 +186,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
             output_label, _, mmapPrediction = model(inputVariable)
 
-            mmapPrediction = mmapPrediction.view(-1)
+            mmapPrediction = mmapPrediction.view(-1, 2)
+            inputMmap = inputMmap = torch.reshape(inputMmap, (-1,))
             inputMmap = torch.reshape(inputMmap, (-1,)).float()
 
             # Weighting the loss of the seflSup task by multiplying it by alpha
@@ -203,12 +204,13 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             mmap_loss += loss2.item()
             epoch_loss += loss.item()
 
+        optim_scheduler.step()
         avg_loss = epoch_loss/iterPerEpoch
         avg_mmap_loss = mmap_loss/iterPerEpoch
         # This is deprecated, see if the below "torch.true_divide" is correct
         #trainAccuracy =  (numCorrTrain / trainSamples) * 100
         trainAccuracy = torch.true_divide(numCorrTrain, trainSamples) * 100
-        optim_scheduler.step()
+
 
         # Vedere se bisogna cambiare il print per la mappa
         print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
