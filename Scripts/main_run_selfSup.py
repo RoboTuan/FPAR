@@ -149,7 +149,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
     # Debug
-    print(model)
+    #print(model)
 
     train_iter = 0
     min_accuracy = 0
@@ -188,7 +188,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
             mmapPrediction = mmapPrediction.view(-1, 2)
             inputMmap = inputMmap = torch.reshape(inputMmap, (-1,))
-            inputMmap = torch.reshape(inputMmap, (-1,)).float()
+            inputMmap = torch.round(inputMmap).long()  #making things black and white again
 
             # Weighting the loss of the seflSup task by multiplying it by alpha
             loss2 = alpha*loss_fn(mmapPrediction,inputMmap)
