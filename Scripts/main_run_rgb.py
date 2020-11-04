@@ -204,8 +204,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
         print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
-        train_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
-        train_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
+        train_log_loss.write('train Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
+        train_log_acc.write('train Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
         if val_data_dir is not None:
             if (epoch+1) % 1 == 0:
                 model.train(False)
