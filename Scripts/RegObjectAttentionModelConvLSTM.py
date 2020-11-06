@@ -46,7 +46,6 @@ class RegSelfSupAttentionModel(nn.Module):
 
 
 
-
     def forward(self, inputVariable):
         state = (Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()),
                  Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()))

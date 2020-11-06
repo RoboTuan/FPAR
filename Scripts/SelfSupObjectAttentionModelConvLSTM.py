@@ -22,7 +22,7 @@ class Flatten(nn.Module):
 
 
 class SelfSupAttentionModel(nn.Module):
-    def __init__(self, num_classes=61, mem_size=512):
+    def __init__(self, num_classes=61, mem_size=512, REGRESSOR=False):
         super(SelfSupAttentionModel, self).__init__()
         self.num_classes = num_classes
         self.resNet = resnetMod.resnet34(True, True)
@@ -34,6 +34,8 @@ class SelfSupAttentionModel(nn.Module):
         self.fc = nn.Linear(mem_size, self.num_classes)
         self.classifier = nn.Sequential(self.dropout, self.fc)
 
+        # Adding flag for the regression option
+        self.REGR = False
 
         #Secondary, self-supervised, task branch
         #Relu+conv+flatten+fullyconnected to get a 2*7*7 = 96 length 
@@ -41,7 +43,12 @@ class SelfSupAttentionModel(nn.Module):
         self.mmapPredictor.add_module('mmap_relu',nn.ReLU(True))
         self.mmapPredictor.add_module('convolution', nn.Conv2d(512, 100, kernel_size=1))
         self.mmapPredictor.add_module('flatten',Flatten())
-        self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*7*7))
+        
+        # Different dimensions for the standard selfSup and regSelfSul tasks
+        if self.REGR != False:
+            self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*7*7))
+        else:
+            self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,7*7))
 
 
 

@@ -12,7 +12,7 @@ import sys
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha):
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -29,7 +29,15 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', out_dir, dataset, 'selfSup', 'stage'+str(stage))  # Dir for saving models and log files
+    if regression==True:
+        model_folder = os.path.join('./', out_dir, dataset, 'RegSelfSup', 'stage'+str(stage))  # Dir for saving models and log files
+    else:
+        # DO this if no attention
+        # TODO:
+        # check if it's correct
+        model_folder = os.path.join('./', out_dir, dataset, 'selfSup', 'stage'+str(stage))  # Dir for saving models and log files
+
+    
     # Create the dir
     # TODO:
     # see if is necessary other if as in colab
@@ -140,8 +148,13 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     model = model.to(DEVICE)
 
     loss_fn = nn.CrossEntropyLoss()
-    # address this to make a loss also for regression with a flag
-    #loss_selfSup = 
+    #TODO: address this to make a loss also for regression with a flag
+    # Loss of the motion segmentation self supervised task,
+    # it is different whether there is regression or not
+    if regression==True:
+        lossMS = nn.MSELoss()
+    else:
+        lossMs = nn.CrossEntropyLoss()
 
 
     optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
@@ -149,7 +162,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
     # Debug
-    #print(model)
+    print(model)
 
     train_iter = 0
     min_accuracy = 0
@@ -186,12 +199,19 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
             output_label, _, mmapPrediction = model(inputVariable)
 
-            mmapPrediction = mmapPrediction.view(-1, 2)
-            inputMmap = inputMmap = torch.reshape(inputMmap, (-1,))
-            inputMmap = torch.round(inputMmap).long()  #making things black and white again
+            if regression == True:
+                # Things to do when regression is selected
+                mmapPrediction = mmapPrediction.view(-1) 
+                #Regression -> float number for the input motion maps        
+                inputMmap = torch.reshape(inputMmap, (-1,)).float()
+            else:
+                # Things to do when regression isn't selected
+                mmapPrediction = mmapPrediction.view(-1, 2)
+                inputMmap = inputMmap = torch.reshape(inputMmap, (-1,))
+                inputMmap = torch.round(inputMmap).long()  #making things black and white again
 
             # Weighting the loss of the seflSup task by multiplying it by alpha
-            loss2 = alpha*loss_fn(mmapPrediction,inputMmap)
+            loss2 = alpha*lossMs(mmapPrediction,inputMmap)
             loss = loss_fn(output_label, labelVariable)
 
             total_loss = loss  + loss2
@@ -230,6 +250,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                 val_iter = 0
                 val_samples = 0
                 numCorr = 0
+
                 with torch.no_grad():
                     for inputs, inputMmap, targets in val_loader:
                         val_iter += 1
@@ -242,10 +263,16 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                         inputMmap = inputMmap.to(DEVICE)
                         output_label, _ , mmapPrediction = model(inputVariable)
 
-                        mmapPrediction = mmapPrediction.view(-1,2)
-                        inputMmap = torch.reshape(inputMmap, (-1,))
-                        inputMmap = torch.round(inputMmap).long()
-                        loss2 = alpha*loss_fn(mmapPrediction,inputMmap)
+                        if regression==True:
+                            mmapPrediction = mmapPrediction.view(-1)
+                            #Regression -> float number for the input motion maps
+                            inputMmap = torch.reshape(inputMmap, (-1,)).float()                            
+                        else:
+                            mmapPrediction = mmapPrediction.view(-1,2)
+                            inputMmap = torch.reshape(inputMmap, (-1,))
+                            inputMmap = torch.round(inputMmap).long()
+                        
+                        loss2 = alpha*lossMs(mmapPrediction,inputMmap)
 
                         val_loss = loss_fn(output_label, labelVariable)
                         val_loss_epoch += val_loss.item()
@@ -313,6 +340,7 @@ def __main__(argv=None):
     #added argument for attention
     parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
     parser.add_argument('--alpha', type=float, default=1, help='Weight for the self supervised task')
+    parser.add_argument('--regression', type=float, default=False, help='Do the motion segmentation task (selfSup) with regression ')
 
 
     #args = parser.parse_args()
@@ -338,6 +366,7 @@ def __main__(argv=None):
     decayRate = args.decayRate
     memSize = args.memSize
     alpha = args.alpha
+    regression = args.regression
 
     main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha)
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression)
