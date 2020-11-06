@@ -35,7 +35,7 @@ class SelfSupAttentionModel(nn.Module):
         self.classifier = nn.Sequential(self.dropout, self.fc)
 
         # Adding flag for the regression option
-        self.REGR = False
+        self.REGR = REGRESSOR
 
         #Secondary, self-supervised, task branch
         #Relu+conv+flatten+fullyconnected to get a 2*7*7 = 96 length 

@@ -159,9 +159,9 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
         #debug
         print("lossMS is mse")
     else:
-        lossMs = nn.CrossEntropyLoss()
+        lossMS = nn.CrossEntropyLoss()
         #debug
-        print("lossMs is crossEntropy")
+        print("lossMS is crossEntropy")
 
 
     optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
@@ -218,7 +218,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                 inputMmap = torch.round(inputMmap).long()  #making things black and white again
 
             # Weighting the loss of the seflSup task by multiplying it by alpha
-            loss2 = alpha*lossMs(mmapPrediction,inputMmap)
+            loss2 = alpha*lossMS(mmapPrediction,inputMmap)
             loss = loss_fn(output_label, labelVariable)
 
             total_loss = loss  + loss2
@@ -279,7 +279,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                             inputMmap = torch.reshape(inputMmap, (-1,))
                             inputMmap = torch.round(inputMmap).long()
                         
-                        val_loss2 = alpha*lossMs(mmapPrediction,inputMmap)
+                        val_loss2 = alpha*lossMS(mmapPrediction,inputMmap)
 
                         val_loss = loss_fn(output_label, labelVariable)
                         val_loss_epoch += val_loss.item()
