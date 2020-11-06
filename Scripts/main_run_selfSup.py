@@ -340,7 +340,7 @@ def __main__(argv=None):
     #added argument for attention
     parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
     parser.add_argument('--alpha', type=float, default=1, help='Weight for the self supervised task')
-    parser.add_argument('--regression', type=float, default=False, help='Do the motion segmentation task (selfSup) with regression ')
+    parser.add_argument('--regression', type=bool, default=False, help='Do the motion segmentation task (selfSup) with regression ')
 
 
     #args = parser.parse_args()
