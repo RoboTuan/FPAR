@@ -30,7 +30,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     DEVICE = "cuda"
 
     #debug
-    print(regression)
+    #print(regression)
 
     if regression==True:
         model_folder = os.path.join('./', out_dir, dataset, 'RegSelfSup', 'stage'+str(stage))  # Dir for saving models and log files
@@ -157,11 +157,11 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     if regression==True:
         lossMS = nn.MSELoss()
         #debug
-        print("lossMS is mse")
+        #print("lossMS is mse")
     else:
         lossMS = nn.CrossEntropyLoss()
         #debug
-        print("lossMS is crossEntropy")
+        #print("lossMS is crossEntropy")
 
 
     optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
