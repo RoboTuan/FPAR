@@ -82,14 +82,14 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_params = []
     if stage == 1:
         
-        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize)
+        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
 
     else:
 
-        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize)
+        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
 
         model.load_state_dict(torch.load(stage1_dict))
         model.train(False)
@@ -272,11 +272,11 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                             inputMmap = torch.reshape(inputMmap, (-1,))
                             inputMmap = torch.round(inputMmap).long()
                         
-                        loss2 = alpha*lossMs(mmapPrediction,inputMmap)
+                        val_loss2 = alpha*lossMs(mmapPrediction,inputMmap)
 
                         val_loss = loss_fn(output_label, labelVariable)
                         val_loss_epoch += val_loss.item()
-                        val_mmap_loss += loss2.item()
+                        val_mmap_loss += val_loss2.item()
 
                         _, predicted = torch.max(output_label.data, 1)
                         numCorr += (predicted == targets.cuda()).sum()

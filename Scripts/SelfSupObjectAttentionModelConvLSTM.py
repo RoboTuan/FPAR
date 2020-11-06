@@ -45,10 +45,10 @@ class SelfSupAttentionModel(nn.Module):
         self.mmapPredictor.add_module('flatten',Flatten())
         
         # Different dimensions for the standard selfSup and regSelfSul tasks
-        if self.REGR != False:
-            self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*7*7))
-        else:
+        if self.REGR == True:
             self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,7*7))
+        else:
+            self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*7*7))
 
 
 
