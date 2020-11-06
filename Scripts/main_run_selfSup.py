@@ -29,7 +29,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     # Setting Device
     DEVICE = "cuda"
 
-    #debug
+    # Debug
     #print(regression)
 
     if regression==True:
@@ -156,11 +156,11 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     # it is different whether there is regression or not
     if regression==True:
         lossMS = nn.MSELoss()
-        #debug
+        # Debug
         #print("lossMS is mse")
     else:
         lossMS = nn.CrossEntropyLoss()
-        #debug
+        # Debug
         #print("lossMS is crossEntropy")
 
 
@@ -169,7 +169,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
     # Debug
-    print(model)
+    #print(model)
 
     train_iter = 0
     min_accuracy = 0
