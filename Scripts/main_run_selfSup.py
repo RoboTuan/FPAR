@@ -33,7 +33,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     #print(regression)
 
     if regression==True:
-        model_folder = os.path.join('./', out_dir, dataset, 'RegSelfSup', 'stage'+str(stage))  # Dir for saving models and log files
+        model_folder = os.path.join('./', out_dir, dataset, 'regSelfSup', 'stage'+str(stage))  # Dir for saving models and log files
     else:
         # DO this if no attention
         # TODO:
@@ -304,11 +304,16 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                 val_log_loss.write('Val MMap Loss after {} epochs = {}\n'.format(epoch + 1, avg_mmap_val_loss))
 
                 if val_accuracy > min_accuracy:
+                    # TODO: see if we can build 2 different dicts
+                    # 1 for selSup and 1 for regSelfSup
                     save_path_model = (model_folder + '/model_selfSup_state_dict.pth')
                     torch.save(model.state_dict(), save_path_model)
                     min_accuracy = val_accuracy
             else:
                 if (epoch+1) % 10 == 0:
+                    # TODO: see if we can build 2 different dicts
+                    # 1 for selSup and 1 for regSelfSup
+                    # PAY ATTENTION THAT THIS IS NOT EQUAL TO THE PREVIOUS ONE
                     save_path_model = (model_folder + '/model_selfSup_state_dict_epoch' + str(epoch+1) + '.pth')
                     torch.save(model.state_dict(), save_path_model)
 
