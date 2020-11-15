@@ -98,4 +98,4 @@ def __main__():
 
     main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
 
-__main__()
+#__main__()
