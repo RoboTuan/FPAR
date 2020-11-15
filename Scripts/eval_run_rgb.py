@@ -90,6 +90,6 @@ def __main__():
     memSize = args.memSize
     attention=args.attention
 
-    main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize)
+    main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
 
 #__main__()
