@@ -1,9 +1,10 @@
 from __future__ import print_function, division
-from flow_resnet import *
-from spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize)
+from ML_DL_Project.Scripts.flow_resnet import *
+from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+                                RandomHorizontalFlip)
 from torch.autograd import Variable
 from torch.utils.data.sampler import WeightedRandomSampler
-from makeDatasetFlow import *
+from ML_DL_Project.Scripts.makeDatasetFlow import *
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import argparse
