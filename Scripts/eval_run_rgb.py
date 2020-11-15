@@ -88,6 +88,7 @@ def __main__():
     dataset_dir = args.datasetDir
     seqLen = args.seqLen
     memSize = args.memSize
+    attention=args.attention
 
     main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize)
 
