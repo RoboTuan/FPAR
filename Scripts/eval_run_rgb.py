@@ -79,6 +79,7 @@ def __main__():
                         help='Model path')
     parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
+    parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
 
     args = parser.parse_args()
 
