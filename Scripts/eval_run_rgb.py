@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import argparse
 import sys
 
-def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize):
+def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention):
 
     if dataset == 'gtea61':
         num_classes = 61
