@@ -1,11 +1,12 @@
 from __future__ import print_function, division
-from spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
-                                RandomHorizontalFlip, FiveCrops)
+from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+                                RandomHorizontalFlip)
 from torch.autograd import Variable
-from twoStreamModel import *
+from ML_DL_Project.Scripts.twoStreamModel import *
+
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-from makeDatasetTwoStream import *
+from ML_DL_Project.Scripts.makeDatasetTwoStream import *
 import argparse
 
 def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize):
