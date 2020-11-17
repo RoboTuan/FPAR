@@ -13,11 +13,14 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     if dataset == 'gtea61':
         num_classes = 61
     elif dataset == 'gtea71':
-      num_classes = 71
+        num_classes = 71
     elif dataset == 'gtea_gaze':
         num_classes = 44
     elif dataset == 'egtea':
         num_classes = 106
+    else:
+        print('Dataset not found')
+        sys.exit()
 
     mean=[0.485, 0.456, 0.406]
     std=[0.229, 0.224, 0.225]
@@ -47,8 +50,8 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     true_labels = []
     predicted_labels = []
     #Controllare se lasciarla così o togliere il contatore chiave
-    for inputs, targets in test_loader:
-    #for j, (inputs, targets) in enumerate(test_loader):
+    #for inputs, targets in test_loader:
+    for j, (inputs, targets) in enumerate(test_loader):
             inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
             output_label, _ = model(inputVariable)
             _, predicted = torch.max(output_label.data, 1)
