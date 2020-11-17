@@ -57,7 +57,8 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
             _, predicted = torch.max(output_label.data, 1)
             numCorr += (predicted == targets.cuda()).sum()
             true_labels.append(targets)
-            predicted_labels.append(predicted)
+            #.cpu() because confusion matrix is from scikit-learn
+            predicted_labels.append(predicted.cpu())
     test_accuracy = (numCorr / test_samples) * 100
     print('Test Accuracy = {}%'.format(test_accuracy))
 
