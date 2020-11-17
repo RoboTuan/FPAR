@@ -61,8 +61,12 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     test_accuracy = (numCorr / test_samples) * 100
     print('Test Accuracy = {}%'.format(test_accuracy))
 
+    print(true_labels)
+    print(predicted_labels)
+
     cnf_matrix = confusion_matrix(true_labels, predicted_labels).astype(float)
     cnf_matrix_normalized = cnf_matrix / cnf_matrix.sum(axis=1)[:, np.newaxis]
+
 
     ticks = np.linspace(0, 60, num=61)
     plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
