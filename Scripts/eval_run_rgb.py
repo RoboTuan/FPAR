@@ -50,8 +50,8 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     true_labels = []
     predicted_labels = []
     #Controllare se lasciarla così o togliere il contatore chiave
-    #for inputs, targets in test_loader:
-    for j, (inputs, targets) in enumerate(test_loader):
+    for inputs, targets in test_loader:
+    #for j, (inputs, targets) in enumerate(test_loader):
             inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
             output_label, _ = model(inputVariable)
             _, predicted = torch.max(output_label.data, 1)
@@ -61,6 +61,7 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     test_accuracy = (numCorr / test_samples) * 100
     print('Test Accuracy = {}%'.format(test_accuracy))
 
+    # ebug
     print(true_labels)
     print(predicted_labels)
 
