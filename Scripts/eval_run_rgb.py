@@ -82,8 +82,9 @@ def __main__(argv=None):
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
     parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
 
-    args = parser.parse_args()
-
+    #args = parser.parse_args()
+    args, _ = parser.parse_known_args(argv)
+    
     dataset = args.dataset
     model_state_dict = args.modelStateDict
     dataset_dir = args.datasetDir
