@@ -115,7 +115,7 @@ def __main__(argv=None):
     args, _ = parser.parse_known_args(argv)
     
     dataset = args.dataset
-    model_state_dict = args.modelStateDict
+    model_state_dict = args.model_state_dict
     dataset_dir = args.datasetDir
     seqLen = args.seqLen
     memSize = args.memSize
