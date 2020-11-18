@@ -19,6 +19,11 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
         num_classes = 44
     elif dataset == 'egtea':
         num_classes = 106
+    else:
+        print('Dataset not found')
+        sys.exit()
+
+    DEVICE = "cuda"
 
     mean=[0.485, 0.456, 0.406]
     std=[0.229, 0.224, 0.225]
@@ -28,8 +33,8 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
     testBatchSize = 1
     spatial_transform = Compose([Scale(256), CenterCrop(224), ToTensor(), normalize])
 
-    vid_seq_test = makeDataset(dataset_dir, spatial_transform=spatial_transform, sequence=False, numSeg=1,
-                               stackSize=stackSize, fmt='.jpg', phase='Test', seqLen=seqLen)
+    vid_seq_test = makeDataset2Stream(dataset_dir, spatial_transform=spatial_transform, sequence=False, numSeg=1,
+                               stackSize=stackSize, fmt='.png', phase='Test', seqLen=seqLen)
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=testBatchSize,
                             shuffle=False, num_workers=2, pin_memory=True)
@@ -51,14 +56,15 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
 
     predicted_labels = []
     true_labels = []
-    for j, (inputFlow, inputFrame, targets) in enumerate(test_loader):
-        inputVariableFrame = Variable(inputFrame.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
-        inputVariableFlow = Variable(inputFlow.cuda(), volatile=True)
-        output_label = model(inputVariableFlow, inputVariableFrame)
-        _, predictedTwoStream = torch.max(output_label.data, 1)
-        numCorrTwoStream += (predictedTwoStream == targets.cuda()).sum()
-        predicted_labels.append(predictedTwoStream)
-        true_labels.append(targets)
+    with torch.no_grad():
+      for j, (inputFlow, inputFrame, targets) in enumerate(test_loader):
+          inputVariableFrame = inputFrame.permute(1, 0, 2, 3, 4).to(DEVICE)
+          inputVariableFlow = inputFlow.to(DEVICE)
+          output_label = model(inputVariableFlow, inputVariableFrame)
+          _, predictedTwoStream = torch.max(output_label.data, 1)
+          numCorrTwoStream += (predictedTwoStream == targets.to(DEVICE)).sum()
+          predicted_labels.append(predictedTwoStream.cpu())
+          true_labels.append(targets)
     test_accuracyTwoStream = (numCorrTwoStream / test_samples) * 100
 
     cnf_matrix = confusion_matrix(true_labels, predicted_labels).astype(float)
@@ -97,5 +103,4 @@ def __main__():
     memSize = args.memSize
 
     main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
-
 #__main__()
