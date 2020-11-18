@@ -78,7 +78,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     plt.savefig(dataset + '-flow.jpg', bbox_inches='tight')
     plt.show()
 
-def __main__():
+def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--datasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/test',
@@ -89,8 +89,9 @@ def __main__():
     parser.add_argument('--stackSize', type=int, default=5, help='Number of optical flow images in input')
     parser.add_argument('--numSegs', type=int, default=5, help='Number of stacked optical flows')
 
-    args = parser.parse_args()
-
+    #args = parser.parse_args()
+    args, _ = parser.parse_known_args(argv)
+    
     dataset = args.dataset
     model_state_dict = args.modelStateDict
     dataset_dir = args.datasetDir
