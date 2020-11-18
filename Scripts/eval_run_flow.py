@@ -20,6 +20,11 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
         num_classes = 44
     elif dataset == 'egtea':
         num_classes = 106
+    else:
+      print("dataset not found")
+      sys.exit()
+    
+    DEVICE="cuda"
 
     mean=[0.485, 0.456, 0.406]
     std=[0.229, 0.224, 0.225]
@@ -47,15 +52,16 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     numCorr = 0
     true_labels = []
     predicted_labels = []
+    with torch.no_grad():
     #for inputs,targets in test_loader:
-    for j, (inputs, targets) in enumerate(test_loader):
-        inputVariable = Variable(inputs[0].cuda(), volatile=True)
-        output_label, _ = model(inputVariable)
-        output_label_mean = torch.mean(output_label.data, 0, True)
-        _, predicted = torch.max(output_label_mean, 1)
-        numCorr += (predicted == targets[0]).sum()
-        true_labels.append(targets)
-        predicted_labels.append(predicted.cpu())
+      for j, (inputs, targets) in enumerate(test_loader):
+          inputVariable = Variable(inputs[0].cuda(), volatile=True)
+          output_label, _ = model(inputVariable)
+          output_label_mean = torch.mean(output_label.data, 0, True)
+          _, predicted = torch.max(output_label_mean, 1)
+          numCorr += (predicted == targets[0]).sum()
+          true_labels.append(targets)
+          predicted_labels.append(predicted.cpu())
     test_accuracy = (numCorr / test_samples) * 100
     print('Test Accuracy  = {}%'.format(test_accuracy))
 
@@ -72,7 +78,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     plt.savefig(dataset + '-flow.jpg', bbox_inches='tight')
     plt.show()
 
-def __main__(argv=None):
+def __main__():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--datasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/test',
@@ -83,9 +89,8 @@ def __main__(argv=None):
     parser.add_argument('--stackSize', type=int, default=5, help='Number of optical flow images in input')
     parser.add_argument('--numSegs', type=int, default=5, help='Number of stacked optical flows')
 
-    #args = parser.parse_args()
-    args, _ = parser.parse_known_args(argv)
-    
+    args = parser.parse_args()
+
     dataset = args.dataset
     model_state_dict = args.modelStateDict
     dataset_dir = args.datasetDir
@@ -93,5 +98,4 @@ def __main__(argv=None):
     numSegs = args.numSegs
 
     main_run(dataset, model_state_dict, dataset_dir, stackSize, numSegs)
-
 #__main__()
