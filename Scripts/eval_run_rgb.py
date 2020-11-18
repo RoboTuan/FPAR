@@ -3,6 +3,7 @@ from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
 from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
 from ML_DL_Project.Scripts.makeDatasetRGB import *
+from ML_DL_Project.Scripts.convLSTMmodel import *
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import argparse
@@ -34,8 +35,14 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=1,
                             shuffle=False, num_workers=2, pin_memory=True)
+    if attention==True:
 
-    model = attentionModel(num_classes=num_classes, mem_size=memSize)
+      model = attentionModel(num_classes=num_classes, mem_size=memSize)
+    else:
+
+      model= clstm_Model(num_classes=num_classes, mem_size=memSize)
+    
+    
     model.load_state_dict(torch.load(model_state_dict))
 
     for params in model.parameters():
