@@ -72,7 +72,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     plt.savefig(dataset + '-flow.jpg', bbox_inches='tight')
     plt.show()
 
-def __main__():
+def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--datasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/test',
