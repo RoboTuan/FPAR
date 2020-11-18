@@ -82,7 +82,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
     plt.savefig(dataset + '-twoStreamJoint.jpg', bbox_inches='tight')
     plt.show()
 
-def __main__():
+def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--datasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/test',
@@ -93,8 +93,9 @@ def __main__():
     parser.add_argument('--stackSize', type=int, default=5, help='Number of optical flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
 
-    args = parser.parse_args()
-
+    #args = parser.parse_args()
+    args, _ = parser.parse_known_args(argv)
+    
     dataset = args.dataset
     model_state_dict = args.modelStateDict
     dataset_dir = args.datasetDir
