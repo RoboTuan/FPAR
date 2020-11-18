@@ -55,7 +55,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     with torch.no_grad():
     #for inputs,targets in test_loader:
       for j, (inputs, targets) in enumerate(test_loader):
-          inputVariable = Variable(inputs[0].cuda(), volatile=True)
+          inputVariable = inputs[0].to(DEVICE)
           output_label, _ = model(inputVariable)
           output_label_mean = torch.mean(output_label.data, 0, True)
           _, predicted = torch.max(output_label_mean, 1)
