@@ -28,8 +28,8 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
 
     spatial_transform = Compose([Scale(256), CenterCrop(224), ToTensor(), normalize])
 
-    vid_seq_test = makeDataset(dataset_dir, spatial_transform=spatial_transform, sequence=True,
-                               numSeg=numSeg, stackSize=stackSize, fmt='.jpg', phase='Test')
+    vid_seq_test = makeDatasetFlow(dataset_dir, spatial_transform=spatial_transform, sequence=True,
+                               numSeg=numSeg, stackSize=stackSize, fmt='.png', phase='Test')
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=1,
                             shuffle=False, num_workers=2, pin_memory=True)
@@ -47,7 +47,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     numCorr = 0
     true_labels = []
     predicted_labels = []
-
+    #for inputs,targets in test_loader:
     for j, (inputs, targets) in enumerate(test_loader):
         inputVariable = Variable(inputs[0].cuda(), volatile=True)
         output_label, _ = model(inputVariable)
@@ -55,7 +55,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
         _, predicted = torch.max(output_label_mean, 1)
         numCorr += (predicted == targets[0]).sum()
         true_labels.append(targets)
-        predicted_labels.append(predicted)
+        predicted_labels.append(predicted.cpu())
     test_accuracy = (numCorr / test_samples) * 100
     print('Test Accuracy  = {}%'.format(test_accuracy))
 
