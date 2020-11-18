@@ -23,6 +23,8 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
         print('Dataset not found')
         sys.exit()
 
+    DEVICE = "cuda"
+
     mean=[0.485, 0.456, 0.406]
     std=[0.229, 0.224, 0.225]
 
@@ -57,17 +59,18 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     true_labels = []
     predicted_labels = []
     #Controllare se lasciarla così o togliere il contatore chiave
-    for inputs, targets in test_loader:
-    #for j, (inputs, targets) in enumerate(test_loader):
-            inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).cuda(), volatile=True)
+    with torch.no_grad():
+        for j, (inputs, targets) in enumerate(test_loader):
+            inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
             output_label, _ = model(inputVariable)
             _, predicted = torch.max(output_label.data, 1)
-            numCorr += (predicted == targets.cuda()).sum()
+            numCorr += (predicted == targets.to(DEVICE)).sum()
             true_labels.append(targets)
             #.cpu() because confusion matrix is from scikit-learn
             predicted_labels.append(predicted.cpu())
+            
     test_accuracy = (numCorr / test_samples) * 100
-    print('Test Accuracy = {}%'.format(test_accuracy))
+    print('Test Accuracy = {}%'.format(test_accuracy))     
 
     # ebug
     print(true_labels)
