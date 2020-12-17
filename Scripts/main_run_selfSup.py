@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 from ML_DL_Project.Scripts.SelfSupObjectAttentionModelConvLSTM import *
+from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
 from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
 from torch.utils.tensorboard import SummaryWriter
@@ -12,7 +13,7 @@ import sys
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression):
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -70,7 +71,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize, shuffle=True, num_workers=4, pin_memory=True)
 
     if val_data_dir is not None:
-        vid_seq_val = makeDataset(val_data_dir,spatial_transform = Compose([Scale(256),
+        vid_seq_val = makeDataset(val_data_dir, spatial_transform = Compose([Scale(256),
                                                                             CenterCrop(224),
                                                                             ToTensor(),
                                                                             normalize]),
@@ -92,9 +93,24 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     else:
 
-        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
+        if pretrainedRgbStage1 == True:
+            # Pretrain from rgb with attention stage 1
+            #TODO: fai paciocco
+            modelRgbStage1 = attentionModel(num_classes=num_classes, mem_size=memSize)
+            modelRgbStage1.load_state_dict(torch.load(rgbStage1Dict))
 
-        model.load_state_dict(torch.load(stage1_dict))
+            model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
+            
+            model.classifier = modelRgbStage1.classifier
+            model.lstm_cell = modelRgbStage1.lstm_cell
+
+
+        else:
+            # Pretrain with stage1 from self supervised
+            model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
+            model.load_state_dict(torch.load(stage1_dict))
+
+
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
@@ -338,7 +354,7 @@ def __main__(argv=None):
     parser.add_argument('--valDatasetDir', type=str, default=None,
                         help='Val set directory')
     parser.add_argument('--outDir', type=str, default='experiments', help='Directory to save results')
-    parser.add_argument('--stage1Dict', type=str, default='./experiments/gtea61/rgb/stage1/best_model_state_dict.pth',
+    parser.add_argument('--stage1Dict', type=str, default='./experiments/gtea61/selfSup/stage1/best_model_state_dict.pth',
                         help='Stage 1 model path')
     parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--trainBatchSize', type=int, default=32, help='Training batch size')
@@ -352,7 +368,9 @@ def __main__(argv=None):
     #added argument for attention
     parser.add_argument('--attention', type=bool, default=True, help='Choose between model with or without spatial attention')
     parser.add_argument('--alpha', type=float, default=1, help='Weight for the self supervised task')
-    parser.add_argument('--regression', type=bool, default=False, help='Do the motion segmentation task (selfSup) with regression ')
+    parser.add_argument('--regression', type=bool, default=False, help='Do the motion segmentation task (selfSup) with regression')
+    parser.add_argument('--pretrainedRgbStage1', type=bool, default=False, help='Option to load the weights of the first stage of the rbg with attention')
+    parser.add_argument('--rgbStage1Dict', type=str, default='./experiments/gtea61/selfSup/stage1/best_model_state_dict.pth', help='If pretrainedRgbStage1 is True, load this dictionary of the model of the rbg with attention')
 
 
     #args = parser.parse_args()
@@ -379,6 +397,8 @@ def __main__(argv=None):
     memSize = args.memSize
     alpha = args.alpha
     regression = args.regression
+    pretrainedRgbStage1 = args.pretrainedRgbStage1
+    rgbStage1Dict = args.rgbStage1Dict
     
     main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression)
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict)
