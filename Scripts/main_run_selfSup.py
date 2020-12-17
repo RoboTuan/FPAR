@@ -70,7 +70,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize, shuffle=True, num_workers=4, pin_memory=True)
 
     if val_data_dir is not None:
-        vid_seq_val = makeDataset(train_data_dir,spatial_transform = Compose([Scale(256),
+        vid_seq_val = makeDataset(val_data_dir,spatial_transform = Compose([Scale(256),
                                                                             CenterCrop(224),
                                                                             ToTensor(),
                                                                             normalize]),
@@ -379,6 +379,3 @@ def __main__(argv=None):
     memSize = args.memSize
     alpha = args.alpha
     regression = args.regression
-
-    main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression)
