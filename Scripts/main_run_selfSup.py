@@ -95,7 +95,6 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
         if pretrainedRgbStage1 == True:
             # Pretrain from rgb with attention stage 1
-            #TODO: fai paciocco
             modelRgbStage1 = attentionModel(num_classes=num_classes, mem_size=memSize)
             modelRgbStage1.load_state_dict(torch.load(rgbStage1Dict))
 
