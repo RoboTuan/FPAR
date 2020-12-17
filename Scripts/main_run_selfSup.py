@@ -379,3 +379,6 @@ def __main__(argv=None):
     memSize = args.memSize
     alpha = args.alpha
     regression = args.regression
+    
+    main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
+             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression)
