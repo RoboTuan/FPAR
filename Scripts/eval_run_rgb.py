@@ -2,7 +2,7 @@ from __future__ import print_function, division
 from ML_DL_Project.Scripts.objectAttentionModelConvLSTM import *
 from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
-from ML_DL_Project.Scripts.makeDatasetRGB import *
+#from ML_DL_Project.Scripts.makeDatasetRGB import *
 from ML_DL_Project.Scripts.convLSTMmodel import *
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
@@ -34,6 +34,7 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     vid_seq_test = makeDataset(dataset_dir,
                                spatial_transform=spatial_transform,
                                seqLen=seqLen, fmt='.png')
+    actions =vid_seq_test.__getLabel__()
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=1,
                             shuffle=False, num_workers=2, pin_memory=True)
@@ -76,15 +77,21 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
     print(true_labels)
     print(predicted_labels)
 
+
+
+
+
     cnf_matrix = confusion_matrix(true_labels, predicted_labels).astype(float)
     cnf_matrix_normalized = cnf_matrix / cnf_matrix.sum(axis=1)[:, np.newaxis]
 
 
-    ticks = np.linspace(0, 60, num=61)
+    #ticks = np.linspace(0, 60, num=61)
+    ticks = [str(action + str(i) ) for i, action in enumerate(actions)]
+    plt.figure(figsize=(20,20))
     plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
     plt.colorbar()
-    plt.xticks(ticks, fontsize=6)
-    plt.yticks(ticks, fontsize=6)
+    plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=6, rotation = 90)
+    plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=6)
     plt.grid(True)
     plt.clim(0, 1)
     plt.savefig(dataset + '-rgb.jpg', bbox_inches='tight')
@@ -112,5 +119,4 @@ def __main__(argv=None):
     attention=args.attention
 
     main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, attention)
-
 #__main__()
