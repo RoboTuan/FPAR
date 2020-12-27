@@ -20,6 +20,7 @@ def gen_split(root_dir, stackSize):
         directory = os.path.join(root_dir, dir_user)
         # print for debugging
         #print(f"directory: {directory}")
+        action = sorted(os.listdir(directory))
         for target in sorted(os.listdir(directory)):
           if not target.startswith('.'):
             directory1 = os.path.join(directory, target)
@@ -45,13 +46,13 @@ def gen_split(root_dir, stackSize):
                      Labels.append(class_id)
                      NumFrames.append(numFrames)
             class_id += 1
-    return Dataset, Labels, NumFrames
+    return Dataset, Labels, NumFrames, action
 
 class makeDataset(Dataset):
     def __init__(self, root_dir, spatial_transform=None, seqLen=20,
                  train=True, mulSeg=False, numSeg=1, fmt='.png'):
 
-        self.images, self.labels, self.numFrames = gen_split(root_dir, 5)
+        self.images, self.labels, self.numFrames,self.insts = gen_split(root_dir, 5)
         self.spatial_transform = spatial_transform
         self.train = train
         self.mulSeg = mulSeg
@@ -81,3 +82,6 @@ class makeDataset(Dataset):
           inpSeq.append(self.spatial_transform(img.convert('RGB')))
         inpSeq = torch.stack(inpSeq, 0)
         return inpSeq, label
+    def __getLabel__(self):
+        return self.insts
+    
