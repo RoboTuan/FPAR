@@ -38,6 +38,8 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=1,
                             shuffle=False, num_workers=2, pin_memory=True)
+    
+    actions =vid_seq_test.__getLabel__()
 
     model = flow_resnet34(False, channels=2*stackSize, num_classes=num_classes)
     model.load_state_dict(torch.load(model_state_dict))
@@ -68,14 +70,15 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     cnf_matrix = confusion_matrix(true_labels, predicted_labels).astype(float)
     cnf_matrix_normalized = cnf_matrix / cnf_matrix.sum(axis=1)[:, np.newaxis]
 
-    ticks = np.linspace(0, 60, num=61)
+    ticks = [str(action + str(i) ) for i, action in enumerate(actions)]
+    plt.figure(figsize=(20,20))
     plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
     plt.colorbar()
-    plt.xticks(ticks, fontsize=6)
-    plt.yticks(ticks, fontsize=6)
+    plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=6, rotation = 90)
+    plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=6)
     plt.grid(True)
     plt.clim(0, 1)
-    plt.savefig(dataset + '-flow.jpg', bbox_inches='tight')
+    plt.savefig(dataset + '-rgb.jpg', bbox_inches='tight')
     plt.show()
 
 def __main__(argv=None):
@@ -97,6 +100,7 @@ def __main__(argv=None):
     dataset_dir = args.datasetDir
     stackSize = args.stackSize
     numSegs = args.numSegs
+
 
     main_run(dataset, model_state_dict, dataset_dir, stackSize, numSegs)
 #__main__()
