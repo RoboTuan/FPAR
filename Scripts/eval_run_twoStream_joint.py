@@ -38,6 +38,8 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=testBatchSize,
                             shuffle=False, num_workers=2, pin_memory=True)
+    
+    actions =vid_seq_test.__getLabel__()
 
     model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes)
     model.load_state_dict(torch.load(model_state_dict))
@@ -72,11 +74,12 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
 
     print('Accuracy {:.02f}%'.format(test_accuracyTwoStream))
 
-    ticks=np.linspace(0, 60, num=61)
-    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
+    ticks = [str(action + str(i) ) for i, action in enumerate(actions)]
+    plt.figure(figsize=(20,20))
+    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='cool')
     plt.colorbar()
-    plt.xticks(ticks,fontsize=6)
-    plt.yticks(ticks,fontsize=6)
+    plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=6, rotation = 90)
+    plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=6)
     plt.grid(True)
     plt.clim(0, 1)
     plt.savefig(dataset + '-twoStreamJoint.jpg', bbox_inches='tight')
@@ -102,6 +105,7 @@ def __main__(argv=None):
     seqLen = args.seqLen
     stackSize = args.stackSize
     memSize = args.memSize
+
 
     main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
 #__main__()
