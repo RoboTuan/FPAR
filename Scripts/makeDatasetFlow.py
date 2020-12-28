@@ -18,6 +18,7 @@ def gen_split(root_dir, stackSize):
         if not dir_user.startswith('.') and dir_user:
             class_id = 0
             directory = os.path.join(root_dir, dir_user)
+            action = sorted(os.listdir(directory))
             for target in sorted(os.listdir(directory)):
                 if not target.startswith('.'):
                     directory1 = os.path.join(directory, target)
@@ -33,7 +34,7 @@ def gen_split(root_dir, stackSize):
                                     Labels.append(class_id)
                                     NumFrames.append(numFrames)
                 class_id += 1
-    return DatasetX, DatasetY, Labels, NumFrames
+    return DatasetX, DatasetY, Labels, NumFrames, action
 
 
 class makeDatasetFlow(Dataset):
@@ -45,7 +46,7 @@ class makeDatasetFlow(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.imagesX, self.imagesY, self.labels, self.numFrames = gen_split(root_dir, stackSize)
+        self.imagesX, self.imagesY, self.labels, self.numFrames, self.action = gen_split(root_dir, stackSize)
         self.spatial_transform = spatial_transform
         self.train = train
         self.numSeg = numSeg
@@ -103,3 +104,5 @@ class makeDatasetFlow(Dataset):
                 inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
             inpSeqSegs = torch.stack(inpSeq, 0).squeeze(1)
             return inpSeqSegs, label#, fl_name
+    def __getLabel__(self):
+        return self.action
