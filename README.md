@@ -1,6 +1,6 @@
 **Group Project for the course "Machine Learning and Deep Learning" at Politecnico di Torino**
 
-**Contributors:**
+**Contributors:**<br/>
 Davide Bussone<br/>
 Antonio Dimitris Defonte<br/>
 Filippo Cortese<br/>
