@@ -78,7 +78,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
     plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=6)
     plt.grid(True)
     plt.clim(0, 1)
-    plt.savefig(dataset + '-rgb.jpg', bbox_inches='tight')
+    plt.savefig(dataset + '-flow.jpg', bbox_inches='tight')
     plt.show()
 
 def __main__(argv=None):
