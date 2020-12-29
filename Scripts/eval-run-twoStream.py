@@ -79,10 +79,12 @@ def main_run(dataset, flowModel_state_dict, RGBModel_state_dict, dataset_dir, st
     cnf_matrix_normalized = cnf_matrix / cnf_matrix.sum(axis=1)[:, np.newaxis]
 
     ticks = np.linspace(0, 60, num=61)
-    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
+    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='Greens')
     plt.colorbar()
-    plt.xticks(ticks, fontsize=6)
-    plt.yticks(ticks, fontsize=6)
+    plt.xticks(ticks, fontsize=10)
+    plt.yticks(ticks, fontsize=10)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
     plt.grid(True)
     plt.clim(0, 1)
     plt.savefig(dataset + '-twoStream.jpg', bbox_inches='tight')
