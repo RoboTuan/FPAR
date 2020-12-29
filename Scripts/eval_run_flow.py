@@ -72,10 +72,12 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, numSeg):
 
     ticks = [str(action + str(i) ) for i, action in enumerate(actions)]
     plt.figure(figsize=(20,20))
-    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
+    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='Blues')
     plt.colorbar()
-    plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=6, rotation = 90)
-    plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=6)
+    plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=10, rotation = 90)
+    plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=10)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
     plt.grid(True)
     plt.clim(0, 1)
     plt.savefig(dataset + '-flow.jpg', bbox_inches='tight')
