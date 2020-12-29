@@ -33,6 +33,7 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, regression
     vid_seq_test = makeDataset(dataset_dir,
                                spatial_transform=spatial_transform,
                                seqLen=seqLen, fmt='.png')
+    actions =vid_seq_test.__getLabel__()
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=1,
                             shuffle=False, num_workers=2, pin_memory=True)
@@ -89,14 +90,17 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, regression
     cnf_matrix_normalized = cnf_matrix / cnf_matrix.sum(axis=1)[:, np.newaxis]
 
 
-    ticks = np.linspace(0, 60, num=61)
-    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='binary')
+    ticks = [str(action + str(i) ) for i, action in enumerate(actions)]
+    plt.figure(figsize=(20,20))
+    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='Reds')
     plt.colorbar()
-    plt.xticks(ticks, fontsize=6)
-    plt.yticks(ticks, fontsize=6)
+    plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=10, rotation = 90)
+    plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=10)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
     plt.grid(True)
     plt.clim(0, 1)
-    plt.savefig(dataset + '-rgb.jpg', bbox_inches='tight')
+    plt.savefig(dataset + '-selfSup.jpg', bbox_inches='tight')
     plt.show()
 
 def __main__(argv=None):
@@ -120,5 +124,6 @@ def __main__(argv=None):
     seqLen = args.seqLen
     memSize = args.memSize
     regression= args.regression
+
 
     main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, regression)
