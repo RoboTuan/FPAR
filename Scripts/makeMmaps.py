@@ -28,6 +28,7 @@ def gen_split(root_dir, stackSize):
       if not dir_user.startswith('.') and dir_user:
         class_id = 0
         directory = os.path.join(root_dir, dir_user)
+        action = sorted(os.listdir(directory))
         # print for debugging
         #print(f"directory: {directory}")
         for target in sorted(os.listdir(directory)):
@@ -76,13 +77,13 @@ def gen_split(root_dir, stackSize):
                      FramesMaps.append(numFramesMaps)
 
             class_id += 1
-    return Dataset, Maps, Labels, NumFrames, FramesMaps
+    return Dataset, Maps, Labels, NumFrames, FramesMaps, action
 
 class makeDataset(Dataset):
     def __init__(self, root_dir, spatial_transform=None, seqLen=20,
                  train=True, stackSize=5, mulSeg=False, numSeg=1, fmt='.png'):
 
-        self.images, self.maps, self.labels, self.numFrames, self.numMapFrames = gen_split(root_dir, stackSize)
+        self.images, self.maps, self.labels, self.numFrames, self.numMapFrames, self.action = gen_split(root_dir, stackSize)
         self.spatial_transform = spatial_transform
         self.train = train
         self.mulSeg = mulSeg
@@ -94,6 +95,10 @@ class makeDataset(Dataset):
 
     def __len__(self):
         return len(self.images)
+    
+    def __getLabel__(self):
+
+      return self.action
 
     def __getitem__(self, idx):
         vid_name = self.images[idx]
@@ -137,3 +142,5 @@ class makeDataset(Dataset):
         inpSeq = torch.stack(inpSeq, 0)
         mapSeq = torch.stack(mapSeq, 0)
         return inpSeq, mapSeq, label
+      
+     
