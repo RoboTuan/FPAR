@@ -57,7 +57,9 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen):
     with torch.no_grad():
     #for inputs,targets in test_loader:
       for j, (inputs, targets) in enumerate(test_loader):
-          inputVariable = inputs[0].to(DEVICE)
+          # levato il "[0]" per l'idt, vedere se ha senso
+          #inputVariable = inputs[0].to(DEVICE)
+          inputVariable = inputs.to(DEVICE)
           output_label, _ = model(inputVariable)
           output_label_mean = torch.mean(output_label.data, 0, True)
           _, predicted = torch.max(output_label_mean, 1)

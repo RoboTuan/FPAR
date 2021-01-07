@@ -143,12 +143,12 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, seqLen, 
                 val_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_val_loss))
                 val_log_acc.write('Val Accuracy after {} epochs = {}%\n'.format(epoch + 1, val_accuracy))
                 if val_accuracy > min_accuracy:
-                    save_path_model = (model_folder + '/model_flow_state_dict.pth')
+                    save_path_model = (model_folder + '/model_idt_state_dict.pth')
                     torch.save(model.state_dict(), save_path_model)
                     min_accuracy = val_accuracy
             else:
                 if (epoch+1) % 10 == 0:
-                    save_path_model = (model_folder + '/model_flow_state_dict_epoch' + str(epoch+1) + '.pth')
+                    save_path_model = (model_folder + '/model_idt_state_dict_epoch' + str(epoch+1) + '.pth')
                     torch.save(model.state_dict(), save_path_model)
 
     train_log_loss.close()
