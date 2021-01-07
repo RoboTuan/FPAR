@@ -104,5 +104,5 @@ def __main__(argv=None):
     seqLen = args.seqLen
 
 
-    main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, numSegs)
+    main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen)
 #__main__()
