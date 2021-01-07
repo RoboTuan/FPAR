@@ -7,9 +7,9 @@ import glob
 import random
 
 
-mean = [0.485, 0.456, 0.406]
-std = [0.229, 0.224, 0.225]
-normalize = Normalize(mean=mean, std=std)
+# mean = [0.485, 0.456, 0.406]
+# std = [0.229, 0.224, 0.225]
+# normalize = Normalize(mean=mean, std=std)
 
 
 def gen_split(root_dir, stackSize):
@@ -143,7 +143,7 @@ class makeDataset(Dataset):
 
         #inpSeq = torch.stack(inpSeq, 0)
         mapSeq = torch.stack(mapSeq, 0)
-        
+
         # from [7, 1, 7, 7] to [7, 7, 7]
         mapSeq = torch.squeeze(mapSeq, 1)
         

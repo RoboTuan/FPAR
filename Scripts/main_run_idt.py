@@ -5,11 +5,11 @@ from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterC
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
-from ML_DL_Project.Scripts.makeDatasetFlow import *
+from ML_DL_Project.Scripts.makeDatasetIDT import *
 import argparse
 import sys
 
-def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
+def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, seqLen, trainBatchSize, valBatchSize, numEpochs, lr1,
              decayRate, stepSize):
 
 
@@ -28,7 +28,7 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', out_dir, dataset, 'flow')
+    model_folder = os.path.join('./', out_dir, dataset, 'idt')
     if os.path.exists(model_folder):
         print('Dir {} exists!'.format(model_folder))
         sys.exit()
@@ -48,15 +48,15 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
     spatial_transform = Compose([Scale(256), RandomHorizontalFlip(), MultiScaleCornerCrop([1, 0.875, 0.75, 0.65625], 224),
                                 ToTensor(), normalize])
 
-    vid_seq_train = makeDatasetFlow(train_data_dir, spatial_transform=spatial_transform, sequence=False,
+    vid_seq_train = makeDataset(train_data_dir, spatial_transform=spatial_transform, seqLen=seqLen,
                                 stackSize=stackSize, fmt='.png')
 
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
                             shuffle=True, sampler=None, num_workers=4, pin_memory=True)
     if val_data_dir is not None:
 
-        vid_seq_val = makeDatasetFlow(val_data_dir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
-                                    sequence=False, stackSize=stackSize, fmt='.png', phase='Test')
+        vid_seq_val = makeDataset(val_data_dir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
+                                    seqLen=seqLen, stackSize=stackSize, fmt='.png')
 
         val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
         valInstances = vid_seq_val.__len__()
@@ -66,8 +66,8 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
     print('Number of samples in the dataset: training = {} | validation = {}'.format(trainInstances, valInstances))
 
 
-
-    model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
+    # channels will be 1*seqLen such as, for example, 7
+    model = flow_resnet34(True, channels=1*seqLen, num_classes=num_classes)
     model.train(True)
     train_params = list(model.parameters())
 
@@ -171,6 +171,7 @@ def __main__(argv=None):
                         help='Validation set directory')
     parser.add_argument('--outDir', type=str, default='experiments', help='Directory to save results')
     parser.add_argument('--stackSize', type=int, default=5, help='Length of sequence')
+    parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--trainBatchSize', type=int, default=32, help='Training batch size')
     parser.add_argument('--valBatchSize', type=int, default=32, help='Validation batch size')
     parser.add_argument('--numEpochs', type=int, default=750, help='Number of epochs')
@@ -190,6 +191,7 @@ def __main__(argv=None):
     valDatasetDir = args.valDatasetDir
     outDir = args.outDir
     stackSize = args.stackSize
+    seqLen = args.seqLen
     trainBatchSize = args.trainBatchSize
     valBatchSize = args.valBatchSize
     numEpochs = args.numEpochs
@@ -197,7 +199,7 @@ def __main__(argv=None):
     stepSize = args.stepSize
     decayRate = args.decayRate
 
-    main_run(dataset, trainDatasetDir, valDatasetDir, outDir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
+    main_run(dataset, trainDatasetDir, valDatasetDir, outDir, stackSize, seqLen, trainBatchSize, valBatchSize, numEpochs, lr1,
              decayRate, stepSize)
 
 #__main__()
