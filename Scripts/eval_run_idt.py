@@ -41,7 +41,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen):
     
     actions =vid_seq_test.__getLabel__()
 
-    model = flow_resnet34(False, channels=2*seqLen, num_classes=num_classes)
+    model = flow_resnet34(False, channels=1*seqLen, num_classes=num_classes)
     model.load_state_dict(torch.load(model_state_dict))
     for params in model.parameters():
         params.requires_grad = False
