@@ -139,7 +139,7 @@ class makeDataset(Dataset):
               continue
           #inpSeq.append(self.spatial_transform(img.convert('RGB')))
           # change how to transform the size for idt flow
-          mapSeq.append(spatial_transform(mappa.convert('L')))
+          mapSeq.append(self.spatial_transform(mappa.convert('L')))
 
         #inpSeq = torch.stack(inpSeq, 0)
         mapSeq = torch.stack(mapSeq, 0)
