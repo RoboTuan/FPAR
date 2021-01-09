@@ -88,7 +88,7 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, testBatchSize, memS
     #ticks = np.linspace(0, 60, num=61)
     ticks = [str(action + str(i) ) for i, action in enumerate(actions)]
     plt.figure(figsize=(20,20))
-    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='purples')
+    plt.imshow(cnf_matrix_normalized, interpolation='none', cmap='Purples')
     plt.colorbar()
     plt.xticks(np.arange(num_classes),labels = set(ticks), fontsize=10, rotation = 90)
     plt.yticks(np.arange(num_classes),labels = set(ticks), fontsize=10)
