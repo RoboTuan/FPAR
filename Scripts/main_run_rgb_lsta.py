@@ -295,6 +295,6 @@ def __main__(argv=None):
     #          valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size):
 
 
-    main_run(dataset=dataset, stage=stage, train_data_dir=trainDatasetDir, valDatasetDir=valDatasetDir, out_dir=outDir, seqLen=seqLen,
+    main_run(dataset=dataset, stage=stage, train_data_dir=trainDatasetDir, val_data_dir=valDatasetDir, out_dir=outDir, seqLen=seqLen,
              trainBatchSize=trainBatchSize, valBatchSize=valBatchSize, numEpochs=numEpochs, lr1=lr1, decay_factor=decayRate,
              decay_step=stepSize, memSize=memSize, outPool_size=outPool_size, evalInterval=evalInterval)
