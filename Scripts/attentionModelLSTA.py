@@ -5,7 +5,7 @@ from ML_DL_Project.Scripts.MyConvLSTACell import *
 
 class attentionModelLSTA(nn.Module):
     def __init__(self, num_classes=51, mem_size=512, c_cam_classes=1000):
-        super(attentionModel, self).__init__()
+        super(attentionModelLSTA, self).__init__()
         self.num_classes = num_classes
         self.resNet = resNet.resnet34(True, True)
         self.mem_size = mem_size
