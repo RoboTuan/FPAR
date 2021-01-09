@@ -13,7 +13,7 @@ import sys
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict):
+             valBatchSize, numEpochs, lr1, decayRate, weightDecay, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -179,7 +179,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
         #print("lossMS is crossEntropy")
 
 
-    optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=4e-5, eps=1e-4)
+    optimizer_fn = torch.optim.Adam(train_params, lr=lr1, weight_decay=weightDecay, eps=1e-4)
 
     optim_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_fn, milestones=stepSize, gamma=decayRate)
 
@@ -362,6 +362,7 @@ def __main__(argv=None):
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--stepSize', type=float, default=[25, 75, 150], nargs="+", help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
+    parser.add_argument('--weightdecay', type=float, default=4e-5, help='Learning rate decay rate')
     parser.add_argument('--stackSize', type=int, default=5, help='Number of opticl flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
     #added argument for attention
@@ -395,9 +396,10 @@ def __main__(argv=None):
     decayRate = args.decayRate
     memSize = args.memSize
     alpha = args.alpha
+    weightDecay = args.weightdecay
     regression = args.regression
     pretrainedRgbStage1 = args.pretrainedRgbStage1
     rgbStage1Dict = args.rgbStage1Dict
     
     main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict)
+             valBatchSize, numEpochs, lr1, decayRate, weightDecay, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict)
