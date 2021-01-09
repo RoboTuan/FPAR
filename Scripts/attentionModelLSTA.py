@@ -1,4 +1,4 @@
-import resNetNew
+import ML_DL_Project.Scripts.resnetMod
 from torch.autograd import Variable
 from ML_DL_Project.Scripts.MyConvLSTACell import *
 
@@ -7,7 +7,7 @@ class attentionModel(nn.Module):
     def __init__(self, num_classes=51, mem_size=512, c_cam_classes=1000):
         super(attentionModel, self).__init__()
         self.num_classes = num_classes
-        self.resNet = resNetNew.resnet34(True, True)
+        self.resNet = resNet.resnet34(True, True)
         self.mem_size = mem_size
         self.lsta_cell = MyConvLSTACell(512, mem_size, c_cam_classes)
         self.avgpool = nn.AvgPool2d(7)
