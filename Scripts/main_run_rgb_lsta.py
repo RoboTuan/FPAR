@@ -258,10 +258,8 @@ def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--stage', type=int, default=1, help='Training stage')
-    parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
-                        help='Train set directory')
-    parser.add_argument('--valDatasetDir', type=str, default=None,
-                        help='Val set directory')
+    parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train', help='Train set directory')
+    parser.add_argument('--valDatasetDir', type=str, default=None, help='Val set directory')
     parser.add_argument('--outDir', type=str, default='experiments', help='Directory to save results')
     parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--trainBatchSize', type=int, default=32, help='Training batch size')
