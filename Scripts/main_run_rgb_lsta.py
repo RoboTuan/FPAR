@@ -168,7 +168,6 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     min_accuracy = 0
 
     for epoch in range(numEpochs):
-        optim_scheduler.step()
         epoch_loss = 0
         numCorrTrain = 0
         trainSamples = 0
@@ -191,6 +190,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             epoch_loss += loss.item()
         avg_loss = epoch_loss/iterPerEpoch
         trainAccuracy = torch.true_divide(numCorrTrain, trainSamples) * 100
+        optim_scheduler.step()
+        
         print('Train: Epoch = {} | Loss = {} | Accuracy = {}'.format(epoch+1, avg_loss, trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch+1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
