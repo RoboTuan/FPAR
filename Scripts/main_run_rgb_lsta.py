@@ -11,10 +11,9 @@ import os
 
 #TODO: create separate dirs for stage1 and stage 2
 
-# def main_run(dataset, stage, root_dir, out_dir, seqLen, trainBatchSize, numEpochs, lr1, decay_factor,
-#              decay_step, memSize, outPool_size, split, evalInterval):
+
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size):
+             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size, evalInterval=evalInterval):
 
 
     if dataset == 'gtea61':
@@ -292,9 +291,9 @@ def __main__(argv=None):
     evalInterval = args.evalInterval
 
     # def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-    #          valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size):
+    #          valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size, evalInterval=evalInterval):
 
 
     main_run(dataset=dataset, stage=stage, train_data_dir=trainDatasetDir, val_data_dir=valDatasetDir, out_dir=outDir, seqLen=seqLen,
-             trainBatchSize=trainBatchSize, valBatchSize=valBatchSize, numEpochs=numEpochs, lr1=lr1, decay_factor=decayRate,
-             decay_step=stepSize, memSize=memSize, outPool_size=outPool_size, evalInterval=evalInterval)
+             trainBatchSize=trainBatchSize, valBatchSize=valBatchSize, numEpochs=numEpochs, lr1=lr1, decayRate=decayRate,
+             stepSize=stepSize, memSize=memSize, outPool_size=outPool_size, evalInterval=evalInterval)
