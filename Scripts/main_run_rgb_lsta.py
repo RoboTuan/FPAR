@@ -13,7 +13,7 @@ import os
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size, evalInterval=evalInterval):
+             valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size, evalInterval):
 
 
     if dataset == 'gtea61':
