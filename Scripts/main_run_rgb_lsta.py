@@ -260,6 +260,8 @@ def __main__(argv=None):
     parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train', help='Train set directory')
     parser.add_argument('--valDatasetDir', type=str, default=None, help='Val set directory')
     parser.add_argument('--outDir', type=str, default='experiments', help='Directory to save results')
+    parser.add_argument('--stage1Dict', type=str, default='./experiments/gtea61/rgb/stage1/best_model_state_dict.pth',
+                        help='Stage 1 model path')
     parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--trainBatchSize', type=int, default=32, help='Training batch size')
     parser.add_argument('--valBatchSize', type=int, default=64, help='Validation batch size')
@@ -279,6 +281,7 @@ def __main__(argv=None):
     trainDatasetDir = args.trainDatasetDir
     valDatasetDir = args.valDatasetDir
     outDir = args.outDir
+    stage1Dict = args.stage1Dict
     seqLen = args.seqLen
     trainBatchSize = args.trainBatchSize
     valBatchSize = args.valBatchSize
@@ -294,6 +297,6 @@ def __main__(argv=None):
     #          valBatchSize, numEpochs, lr1, decayRate, stepSize, memSize, outPool_size, evalInterval=evalInterval):
 
 
-    main_run(dataset=dataset, stage=stage, train_data_dir=trainDatasetDir, val_data_dir=valDatasetDir, out_dir=outDir, seqLen=seqLen,
+    main_run(dataset=dataset, stage=stage, train_data_dir=trainDatasetDir, val_data_dir=valDatasetDir, stage1_dict=stage1Dict, out_dir=outDir, seqLen=seqLen,
              trainBatchSize=trainBatchSize, valBatchSize=valBatchSize, numEpochs=numEpochs, lr1=lr1, decayRate=decayRate,
              stepSize=stepSize, memSize=memSize, outPool_size=outPool_size, evalInterval=evalInterval)
