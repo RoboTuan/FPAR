@@ -362,7 +362,7 @@ def __main__(argv=None):
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--stepSize', type=float, default=[25, 75, 150], nargs="+", help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.1, help='Learning rate decay rate')
-    parser.add_argument('--weightdecay', type=float, default=4e-5, help='Learning rate decay rate')
+    parser.add_argument('--weightDecay', type=float, default=4e-5, help='Learning rate decay rate')
     parser.add_argument('--stackSize', type=int, default=5, help='Number of opticl flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
     #added argument for attention
@@ -396,7 +396,7 @@ def __main__(argv=None):
     decayRate = args.decayRate
     memSize = args.memSize
     alpha = args.alpha
-    weightDecay = args.weightdecay
+    weightDecay = args.weightDecay
     regression = args.regression
     pretrainedRgbStage1 = args.pretrainedRgbStage1
     rgbStage1Dict = args.rgbStage1Dict
