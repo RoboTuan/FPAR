@@ -33,7 +33,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
     model_folder = os.path.join('./', out_dir, dataset, 'rgb_lsta', 'stage'+str(stage))
 
-    if not os.path.exists(model_folder):
+    if os.path.exists(model_folder):
         print('Directory {} exitst!'.format(model_folder))
         sys.exit()
     os.makedirs(model_folder)
