@@ -102,7 +102,7 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, testBatchSize, memS
 
 
 
-def __main__():
+def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
     parser.add_argument('--modelStateDict', type=str, default='./models/gtea61/best_model_state_dict_rgb_split2.pth',
@@ -114,7 +114,7 @@ def __main__():
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
     parser.add_argument('--outPoolSize', type=int, default=100, help='Output pooling size')
 
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args(argv)
 
     dataset = args.dataset
     modelStateDict = args.modelStateDict
