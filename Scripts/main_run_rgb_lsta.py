@@ -47,34 +47,6 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     val_log_acc = open((model_folder + '/val_log_acc.txt'), 'w')
 
 
-
-
-    # stage = stage
-    # test_split = split
-    # seqLen = seqLen
-    # memSize = memSize
-    # c_cam_classes = outPool_size
-    # dataset = dataset
-    # best_acc = 0
-
-    # if stage == 1:
-    #     trainBatchSize = trainBatchSize
-    #     testBatchSize = trainBatchSize
-    #     lr1 = lr1
-    #     decay_factor = decay_factor
-    #     decay_step = decay_step
-    #     numEpochs = numEpochs
-    # elif stage == 2:
-    #     trainBatchSize = trainBatchSize
-    #     testBatchSize = trainBatchSize
-    #     lr1 = lr1
-    #     decay_factor = decay_factor
-    #     decay_step = decay_step
-    #     numEpochs = numEpochs
-
-
-
-
     # Data loader
 
     mean=[0.485, 0.456, 0.406]
@@ -197,15 +169,6 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
         writer.add_scalar('train/accuracy', trainAccuracy, epoch+1)
         train_log_loss.write('train Loss after {} epochs = {}\n'.format(epoch + 1, avg_loss))
         train_log_acc.write('train Accuracy after {} epochs = {}%\n'.format(epoch + 1, trainAccuracy))
-
-        # save_path_model = os.path.join(model_folder, 'last_checkpoint_stage' + str(stage) + '.pth.tar')
-        # save_file = {
-        #         'epoch': epoch + 1,
-        #         'model_state_dict': model.state_dict(),
-        #         'optimizer_state_dict': optimizer_fn.state_dict(),
-        #         'best_acc': best_acc,
-        #     }
-        # torch.save(save_file, save_path_model)
 
         if val_data_dir is not None:
             if (epoch+1) % evalInterval == 0:
