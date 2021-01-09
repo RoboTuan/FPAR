@@ -31,36 +31,36 @@ class MyConvLSTACell(nn.Module):
         self.conv_o_cam = nn.Conv2d(1, 1, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
 
         if zero_init:
-            torch.nn.init.constant(self.conv_i_s.weight, 0)
-            torch.nn.init.constant(self.conv_i_s.bias, 0)
-            torch.nn.init.constant(self.conv_i_cam.weight, 0)
+            nn.init.constant_(self.conv_i_s.weight, 0)
+            nn.init.constant_(self.conv_i_s.bias, 0)
+            nn.init.constant_(self.conv_i_cam.weight, 0)
 
-            torch.nn.init.constant(self.conv_f_s.weight, 0)
-            torch.nn.init.constant(self.conv_f_s.bias, 0)
-            torch.nn.init.constant(self.conv_f_cam.weight, 0)
+            nn.init.constant_(self.conv_f_s.weight, 0)
+            nn.init.constant_(self.conv_f_s.bias, 0)
+            nn.init.constant_(self.conv_f_cam.weight, 0)
 
-            torch.nn.init.constant(self.conv_a_s.weight, 0)
-            torch.nn.init.constant(self.conv_a_s.bias, 0)
+            nn.init.constant_(self.conv_a_s.weight, 0)
+            nn.init.constant_(self.conv_a_s.bias, 0)
 
-            torch.nn.init.constant(self.conv_o_s.weight, 0)
-            torch.nn.init.constant(self.conv_o_s.bias, 0)
-            torch.nn.init.constant(self.conv_o_cam.weight, 0)
+            nn.init.constant_(self.conv_o_s.weight, 0)
+            nn.init.constant_(self.conv_o_s.bias, 0)
+            nn.init.constant_(self.conv_o_cam.weight, 0)
         else:
-            torch.nn.init.xavier_normal(self.conv_i_s.weight)
-            torch.nn.init.constant(self.conv_i_s.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_i_cam.weight)
+            nn.init.xavier_normal_(self.conv_i_s.weight)
+            nn.init.constant_(self.conv_i_s.bias, 0)
+            nn.init.xavier_normal_(self.conv_i_cam.weight)
 
-            torch.nn.init.xavier_normal(self.conv_f_s.weight)
-            torch.nn.init.constant(self.conv_f_s.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_f_cam.weight)
+            nn.init.xavier_normal_(self.conv_f_s.weight)
+            nn.init.constant_(self.conv_f_s.bias, 0)
+            nn.init.xavier_normal_(self.conv_f_cam.weight)
 
-            torch.nn.init.xavier_normal(self.conv_a_s.weight)
-            torch.nn.init.constant(self.conv_a_s.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_a_cam.weight)
+            nn.init.xavier_normal_(self.conv_a_s.weight)
+            nn.init.constant_(self.conv_a_s.bias, 0)
+            nn.init.xavier_normal_(self.conv_a_cam.weight)
 
-            torch.nn.init.xavier_normal(self.conv_o_s.weight)
-            torch.nn.init.constant(self.conv_o_s.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_o_cam.weight)
+            nn.init.xavier_normal_(self.conv_o_s.weight)
+            nn.init.constant_(self.conv_o_s.bias, 0)
+            nn.init.xavier_normal_(self.conv_o_cam.weight)
 
         # Memory params
 
@@ -81,37 +81,37 @@ class MyConvLSTACell(nn.Module):
                                   bias=False)
 
         if zero_init:
-            torch.nn.init.constant(self.conv_i_x.weight, 0)
-            torch.nn.init.constant(self.conv_i_x.bias, 0)
-            torch.nn.init.constant(self.conv_i_c.weight, 0)
+            nn.init.constant_(self.conv_i_x.weight, 0)
+            nn.init.constant_(self.conv_i_x.bias, 0)
+            nn.init.constant_(self.conv_i_c.weight, 0)
 
-            torch.nn.init.constant(self.conv_f_x.weight, 0)
-            torch.nn.init.constant(self.conv_f_x.bias, 0)
-            torch.nn.init.constant(self.conv_f_c.weight, 0)
+            nn.init.constant_(self.conv_f_x.weight, 0)
+            nn.init.constant_(self.conv_f_x.bias, 0)
+            nn.init.constant_(self.conv_f_c.weight, 0)
 
-            torch.nn.init.constant(self.conv_c_x.weight, 0)
-            torch.nn.init.constant(self.conv_c_x.bias, 0)
-            torch.nn.init.constant(self.conv_c_c.weight, 0)
+            nn.init.constant_(self.conv_c_x.weight, 0)
+            nn.init.constant_(self.conv_c_x.bias, 0)
+            nn.init.constant_(self.conv_c_c.weight, 0)
 
-            torch.nn.init.constant(self.conv_o_x.weight, 0)
-            torch.nn.init.constant(self.conv_o_x.bias, 0)
-            torch.nn.init.constant(self.conv_o_c.weight, 0)
+            nn.init.constant_(self.conv_o_x.weight, 0)
+            nn.init.constant_(self.conv_o_x.bias, 0)
+            nn.init.constant_(self.conv_o_c.weight, 0)
         else:
-            torch.nn.init.xavier_normal(self.conv_i_x.weight)
-            torch.nn.init.constant(self.conv_i_x.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_i_c.weight)
+            nn.init.xavier_normal_(self.conv_i_x.weight)
+            nn.init.constant_(self.conv_i_x.bias, 0)
+            nn.init.xavier_normal_(self.conv_i_c.weight)
 
-            torch.nn.init.xavier_normal(self.conv_f_x.weight)
-            torch.nn.init.constant(self.conv_f_x.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_f_c.weight)
+            nn.init.xavier_normal_(self.conv_f_x.weight)
+            nn.init.constant_(self.conv_f_x.bias, 0)
+            nn.init.xavier_normal_(self.conv_f_c.weight)
 
-            torch.nn.init.xavier_normal(self.conv_c_x.weight)
-            torch.nn.init.constant(self.conv_c_x.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_c_c.weight)
+            nn.init.xavier_normal_(self.conv_c_x.weight)
+            nn.init.constant_(self.conv_c_x.bias, 0)
+            nn.init.xavier_normal_(self.conv_c_c.weight)
 
-            torch.nn.init.xavier_normal(self.conv_o_x.weight)
-            torch.nn.init.constant(self.conv_o_x.bias, 0)
-            torch.nn.init.xavier_normal(self.conv_o_c.weight)
+            nn.init.xavier_normal_(self.conv_o_x.weight)
+            nn.init.constant_(self.conv_o_x.bias, 0)
+            nn.init.xavier_normal_(self.conv_o_c.weight)
 
     def forward(self, x, cam, state_att, state_inp, x_flow_i=0, x_flow_f=0, x_flow_c=0, x_flow_o=0):
         # state_att = [a, s]
@@ -120,17 +120,17 @@ class MyConvLSTACell(nn.Module):
         a_t_1 = state_att[0]
         s_t_1 = state_att[1]
 
-        c_t_1 = F.tanh(state_inp[0])
+        c_t_1 = torch.tanh(state_inp[0])
         o_t_1 = state_inp[1]
 
         # Attention recurrence
 
-        i_s = F.sigmoid(self.conv_i_s(s_t_1) + self.conv_i_cam(cam))
-        f_s = F.sigmoid(self.conv_f_s(s_t_1) + self.conv_f_cam(cam))
-        o_s = F.sigmoid(self.conv_o_s(s_t_1) + self.conv_o_cam(cam))
-        a_tilde = F.tanh(self.conv_a_s(s_t_1) + self.conv_a_cam(cam))
+        i_s = torch.sigmoid(self.conv_i_s(s_t_1) + self.conv_i_cam(cam))
+        f_s = torch.sigmoid(self.conv_f_s(s_t_1) + self.conv_f_cam(cam))
+        o_s = torch.sigmoid(self.conv_o_s(s_t_1) + self.conv_o_cam(cam))
+        a_tilde = torch.tanh(self.conv_a_s(s_t_1) + self.conv_a_cam(cam))
         a = (f_s * a_t_1) + (i_s * a_tilde)
-        s = o_s * F.tanh(a)
+        s = o_s * torch.tanh(a)
         u = s + cam  # hidden state + cam
 
         u = F.softmax(u.view(u.size(0), -1), 1)
@@ -138,9 +138,9 @@ class MyConvLSTACell(nn.Module):
 
         x_att = x * u.expand_as(x)
 
-        i_x = F.sigmoid(self.conv_i_c(o_t_1 * c_t_1) + self.conv_i_x(x_att) + x_flow_i)
-        f_x = F.sigmoid(self.conv_f_c(o_t_1 * c_t_1) + self.conv_f_x(x_att) + x_flow_f)
-        c_tilde = F.tanh(self.conv_c_c(o_t_1 * c_t_1) + self.conv_c_x(x_att) + x_flow_c)
+        i_x = torch.sigmoid(self.conv_i_c(o_t_1 * c_t_1) + self.conv_i_x(x_att) + x_flow_i)
+        f_x = torch.sigmoid(self.conv_f_c(o_t_1 * c_t_1) + self.conv_f_x(x_att) + x_flow_f)
+        c_tilde = torch.tanh(self.conv_c_c(o_t_1 * c_t_1) + self.conv_c_x(x_att) + x_flow_c)
         c = (f_x * state_inp[0]) + (i_x * c_tilde)
 
         c_vec = self.avgpool(c).view(c.size(0), -1)
@@ -148,7 +148,7 @@ class MyConvLSTACell(nn.Module):
         c_probs, c_idxs = c_logits.sort(1, True)
         c_class_idx = c_idxs[:, 0]
         c_cam = self.c_classifier.weight[c_class_idx].unsqueeze(2).unsqueeze(2) * c
-        o_x = F.sigmoid(self.conv_o_x(o_t_1 * c_t_1) + self.conv_o_c(c_cam)) 
+        o_x = torch.sigmoid(self.conv_o_x(o_t_1 * c_t_1) + self.conv_o_c(c_cam)) 
 
         state_att = [a, s]
         state_inp = [c, o_x]
