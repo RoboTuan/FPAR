@@ -78,8 +78,8 @@ def main_run(dataset, model_state_dict, dataset_dir, seqLen, testBatchSize, memS
     print('Test Accuracy after = {}%'.format(test_accuracy))
 
     # ebug
-    print(true_labels)
-    print(predicted_labels)
+    # print(true_labels)
+    # print(predicted_labels)
 
     cnf_matrix = confusion_matrix(true_labels, predicted_labels).astype(float)
     cnf_matrix_normalized = cnf_matrix / cnf_matrix.sum(axis=1)[:, np.newaxis]
