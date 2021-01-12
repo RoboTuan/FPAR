@@ -38,7 +38,7 @@ def main_run(dataset, stage1_dict, pretrained_first_stage, train_data_dir, val_d
         sys.exit()
 
     #debub
-    print(stepSize)
+    #print(stepSize)
 
     # Setting Device
     DEVICE = "cuda"
