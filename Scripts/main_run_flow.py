@@ -10,7 +10,7 @@ import argparse
 import sys
 
 def main_run(dataset, stage1_dict, pretrained_first_stage, train_data_dir, val_data_dir, out_dir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
-             decayRate, stepSize, stage=2):
+             decayRate, stepSize, stage):
 
 
     if dataset == 'gtea61':
