@@ -227,6 +227,7 @@ def __main__(argv=None):
     parser.add_argument('--lr', type=float, default=1e-2, help='Learning rate')
     parser.add_argument('--stepSize', type=float, default=[150, 300, 500], nargs="+", help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.5, help='Learning rate decay rate')
+    parser.add_argument('--stage', type=int, default=2, help='Stage for training')
 
     #args = parser.parse_args()
 
@@ -250,6 +251,6 @@ def __main__(argv=None):
     decayRate = args.decayRate
 
     main_run(dataset, stage1Dict, pretrained_first_stage, trainDatasetDir, valDatasetDir, outDir, stackSize,
-             trainBatchSize, valBatchSize, numEpochs, lr1, decayRate, stepSize)
+             trainBatchSize, valBatchSize, numEpochs, lr1, decayRate, stepSize, stage)
 
 #__main__()
