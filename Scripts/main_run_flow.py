@@ -37,6 +37,9 @@ def main_run(dataset, stage1_dict, pretrained_first_stage, train_data_dir, val_d
         print('Dataset not found')
         sys.exit()
 
+    #debub
+    print(stepSize)
+
     # Setting Device
     DEVICE = "cuda"
 
