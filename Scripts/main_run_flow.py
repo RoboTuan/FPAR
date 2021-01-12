@@ -76,6 +76,8 @@ def main_run(dataset, stage1_dict, pretrained_first_stage, train_data_dir, val_d
 
             val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
             valInstances = vid_seq_val.__len__()    
+            trainInstances = vid_seq_train.__len__()
+            print('Number of samples in the dataset: training = {} | validation = {}'.format(trainInstances, valInstances))
 
 
     else:
@@ -94,8 +96,8 @@ def main_run(dataset, stage1_dict, pretrained_first_stage, train_data_dir, val_d
             valInstances = vid_seq_val.__len__()
 
 
-    trainInstances = vid_seq_train.__len__()
-    print('Number of samples in the dataset: training = {} | validation = {}'.format(trainInstances, valInstances))
+            trainInstances = vid_seq_train.__len__()
+            print('Number of samples in the dataset: training = {} | validation = {}'.format(trainInstances, valInstances))
 
     if stage == 1:
         model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
