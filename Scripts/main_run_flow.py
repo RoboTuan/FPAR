@@ -9,18 +9,30 @@ from ML_DL_Project.Scripts.makeDatasetFlow import *
 import argparse
 import sys
 
-def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
-             decayRate, stepSize):
+def main_run(dataset, stage1_dict, pretrained_first_stage, train_data_dir, val_data_dir, out_dir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
+             decayRate, stepSize, stage=2):
 
 
     if dataset == 'gtea61':
-        num_classes = 61
+        if stage == 1:
+            num_classes = 10
+        else:
+            num_classes = 61
     elif dataset == 'gtea71':
-      num_classes = 71
+        if stage == 1:
+            num_classes = 10
+        else:
+            num_classes = 71
     elif dataset == 'gtea_gaze':
-        num_classes = 44
+        if stage == 1:
+            num_classes = 10
+        else:
+            num_classes = 44
     elif dataset == 'egtea':
-        num_classes = 106
+        if stage == 1:
+            num_classes = 10
+        else:
+            num_classes = 106
     else:
         print('Dataset not found')
         sys.exit()
@@ -28,7 +40,7 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', out_dir, dataset, 'flow')
+    model_folder = os.path.join('./', out_dir, dataset, 'flow', 'stage'+str(stage))
     if os.path.exists(model_folder):
         print('Dir {} exists!'.format(model_folder))
         sys.exit()
@@ -48,26 +60,59 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
     spatial_transform = Compose([Scale(256), RandomHorizontalFlip(), MultiScaleCornerCrop([1, 0.875, 0.75, 0.65625], 224),
                                 ToTensor(), normalize])
 
-    vid_seq_train = makeDatasetFlow(train_data_dir, spatial_transform=spatial_transform, sequence=False,
-                                stackSize=stackSize, fmt='.png')
 
-    train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
-                            shuffle=True, sampler=None, num_workers=4, pin_memory=True)
-    if val_data_dir is not None:
 
-        vid_seq_val = makeDatasetFlow(val_data_dir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
-                                    sequence=False, stackSize=stackSize, fmt='.png', phase='Test')
 
-        val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
-        valInstances = vid_seq_val.__len__()
+    if stage == 1:
+        vid_seq_train = makeDatasetFlow(train_data_dir, spatial_transform=spatial_transform, sequence=False,
+                                    stackSize=stackSize, fmt='.png', LSTA=True)
+
+        train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
+                                shuffle=True, sampler=None, num_workers=4, pin_memory=True)
+        if val_data_dir is not None:
+
+            vid_seq_val = makeDatasetFlow(val_data_dir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
+                                        sequence=False, stackSize=stackSize, fmt='.png', phase='Test', LSTA=True)
+
+            val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
+            valInstances = vid_seq_val.__len__()    
+
+
+    else:
+
+        vid_seq_train = makeDatasetFlow(train_data_dir, spatial_transform=spatial_transform, sequence=False,
+                                    stackSize=stackSize, fmt='.png')
+
+        train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
+                                shuffle=True, sampler=None, num_workers=4, pin_memory=True)
+        if val_data_dir is not None:
+
+            vid_seq_val = makeDatasetFlow(val_data_dir, spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
+                                        sequence=False, stackSize=stackSize, fmt='.png', phase='Test')
+
+            val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
+            valInstances = vid_seq_val.__len__()
 
 
     trainInstances = vid_seq_train.__len__()
     print('Number of samples in the dataset: training = {} | validation = {}'.format(trainInstances, valInstances))
 
+    if stage == 1:
+        model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
+    else:
+        if pretrained_first_stage is True:
+            model = flow_resnet34(True, channels=2*stackSize, num_classes=10)
+            #print(model)
+            #sys.exit()
+            model.load_state_dict(torch.load(stage1_dict))
+            # In the flow_resnet script we have:
+            # self.fc_action = nn.Linear(512 * block.expansion, num_classes) at line 113.
+            # Since "block" is an instance of the class BasicBlock,
+            #  exapansion is set to 1 at line 28 (in that class)
+            model.fc_action = nn.Linear(512, 61)
+        else:
+            model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
 
-
-    model = flow_resnet34(True, channels=2*stackSize, num_classes=num_classes)
     model.train(True)
     train_params = list(model.parameters())
 
@@ -165,6 +210,9 @@ def main_run(dataset, train_data_dir, val_data_dir, out_dir, stackSize, trainBat
 def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
+    parser.add_argument('--stage1Dict', type=str, default='./experiments/gtea61/rgb/stage1/best_model_state_dict.pth', 
+                        help='Stage 1 model path')
+    parser.add_argument('--pretrained_first_stage', type=bool, default=False)
     parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
                         help='Train set directory')
     parser.add_argument('--valDatasetDir', type=str, default=None,
@@ -189,6 +237,8 @@ def __main__(argv=None):
     trainDatasetDir = args.trainDatasetDir
     valDatasetDir = args.valDatasetDir
     outDir = args.outDir
+    stage1Dict = args.stage1Dict
+    pretrained_first_stage = args.pretrained_first_stage
     stackSize = args.stackSize
     trainBatchSize = args.trainBatchSize
     valBatchSize = args.valBatchSize
@@ -197,7 +247,7 @@ def __main__(argv=None):
     stepSize = args.stepSize
     decayRate = args.decayRate
 
-    main_run(dataset, trainDatasetDir, valDatasetDir, outDir, stackSize, trainBatchSize, valBatchSize, numEpochs, lr1,
-             decayRate, stepSize)
+    main_run(dataset, stage1Dict, pretrained_first_stage, trainDatasetDir, valDatasetDir, outDir, stackSize,
+             trainBatchSize, valBatchSize, numEpochs, lr1, decayRate, stepSize)
 
 #__main__()

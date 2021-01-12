@@ -8,10 +8,11 @@ import glob
 import sys
 
 
-def gen_split(root_dir, stackSize):
+def gen_split(root_dir, stackSize, LSTA=False):
     DatasetX = []
     DatasetY = []
     Labels = []
+    #actionLabels = [] 
     NumFrames = []
     root_dir = os.path.join(root_dir, 'flow_x_processed')
     for dir_user in sorted(os.listdir(root_dir)):
@@ -19,7 +20,19 @@ def gen_split(root_dir, stackSize):
             class_id = 0
             directory = os.path.join(root_dir, dir_user)
             action = sorted(os.listdir(directory))
-            for target in sorted(os.listdir(directory)):
+
+            if LSTA is True:
+              action_only = [a.split("_")[0] for a in action]
+
+            targets = sorted(os.listdir(directory))
+
+
+            for i, target in enumerate(sorted(os.listdir(directory))):
+                
+                if LSTA is True:
+                  target_only = target.split("_")[0]
+                  #print(target, target_only)
+
                 if not target.startswith('.'):
                     directory1 = os.path.join(directory, target)
                     insts = sorted(os.listdir(directory1))
@@ -33,20 +46,31 @@ def gen_split(root_dir, stackSize):
                                     DatasetY.append(inst_dir.replace('flow_x', 'flow_y'))
                                     Labels.append(class_id)
                                     NumFrames.append(numFrames)
-                class_id += 1
-    return DatasetX, DatasetY, Labels, NumFrames, action
+
+                if LSTA is True:
+                  if i < len(targets)-1:
+                    if targets[i+1].split("_")[0] != target_only:
+                      class_id += 1
+                else:
+                  class_id += 1
+
+    if LSTA is True:
+      return DatasetX, DatasetY, Labels, NumFrames, action_only
+    else:
+      return DatasetX, DatasetY, Labels, NumFrames, action
+
 
 
 class makeDatasetFlow(Dataset):
     def __init__(self, root_dir, spatial_transform=None, sequence=False, stackSize=5,
-                 train=True, numSeg = 1, fmt='.png', phase='train'):
+                 train=True, numSeg = 1, fmt='.png', phase='train', LSTA=False):
         """
         Args:
             root_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.imagesX, self.imagesY, self.labels, self.numFrames, self.action = gen_split(root_dir, stackSize)
+        self.imagesX, self.imagesY, self.labels, self.numFrames, self.action = gen_split(root_dir, stackSize, LSTA)
         self.spatial_transform = spatial_transform
         self.train = train
         self.numSeg = numSeg
@@ -61,6 +85,9 @@ class makeDatasetFlow(Dataset):
     def __getitem__(self, idx):
         vid_nameX = self.imagesX[idx]
         vid_nameY = self.imagesY[idx]
+        #print(len(self.labels), self.labels)
+        #print(idx)
+
         label = self.labels[idx]
         numFrame = self.numFrames[idx]
         inpSeqSegs = []
