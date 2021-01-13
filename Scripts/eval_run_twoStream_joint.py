@@ -42,7 +42,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize,
     actions =vid_seq_test.__getLabel__()
 
     if LSTA is True:
-        model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes, LSTA)
+        model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes, LSTA=LSTA)
     else:
         model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes)
     
