@@ -6,9 +6,9 @@ def change_key_names(flow_model_path,frame_model_path,out_path_flow,out_path_fra
 
     
 
-    frameModel = resnet_34(num_classes, memSize)
+    frameModel = resnet34(num_classes, memSize)
     frameModel.load_state_dict(torch.load(frame_model_path))
-    frameModelB = resnet_34(num_classes, memSize)
+    frameModelB = resnet34(num_classes, memSize)
     frameModel.load_state_dict(torch.load(frame_model_path))
 
     state_dict = frameModel.state_dict()
