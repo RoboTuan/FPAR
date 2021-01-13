@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 import math
 import torch.utils.model_zoo as model_zoo
 
@@ -62,15 +63,14 @@ class cmaBlock(nn.Module):
     expansion = 1
 
     def __init__(self, planes, stride=1):
-        super(CmaBlock, self).__init__()
-        self.noBN = noBN
+        super(cmaBlock, self).__init__()
         self.stride = stride
-        self.convQ = conv1x1(planes, planes/2, stride)
-        self.convK = conv1x1(inplanes, planes/2, stride)
-        self.convV = conv1x1(inplanes, planes/2, stride)
-        self.convZ = conv1x1(planes/2, planes, stride)
+        self.convQ = conv1x1(planes, int(planes/2), stride)
+        self.convK = conv1x1(planes, int(planes/2), stride)
+        self.convV = conv1x1(planes, int(planes/2), stride)
+        self.convZ = conv1x1(int(planes/2), planes, stride)
         self.softmax1 = torch.nn.Softmax()
-        self.bn_cma = nn.BatchNorm2d(planes)
+        self.bn = nn.BatchNorm2d(planes)
         
 
     def forward(self, x, y):
@@ -78,8 +78,8 @@ class cmaBlock(nn.Module):
         V = self.convV(y)
         Q = self.convQ(x)
         K = self.convK(y)
-        M = self.softmax1(torch.matmul(Q,K.t())
-        Z = torch.matmul(M,V)
+        M = self.softmax1(torch.matmul(Q,K.t()))
+        Z = torch.mm(M,V)
         Z = self.convZ(Z)
         Z = self.bn(Z)
         out = residual + Z
@@ -196,19 +196,20 @@ class doubleResNet(nn.Module):
         self.inplanes = 64
         self.noBN = noBN
         super(doubleResNet, self).__init__()
-        self.conv1_cm_rgb = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+        self.cm_rgb_conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
-        self.bn1_cm_rgb = nn.BatchNorm2d(64)
-        self.relu_cm_rgb = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1_cm_rgb = self._make_layer(block, 64, layers[0])
-        self.layer2_cm_rgb = self._make_layer(block, 128, layers[1], stride=2)
-        self.layer3_cm_rgb = self._make_layer(block, 256, layers[2], stride=2)
-        self.cma1_cm_rgb = self._make_cma_layer(cmaBlock, 256,stride=1)
-        self.layer4_cm_rgb = self._make_layer(block, 512, layers[3], stride=2, noBN=self.noBN)
-        self.avgpool_cm_rgb = nn.AvgPool2d(7, stride=1)
-        self.fc_cm_rgb = nn.Linear(512 * block.expansion, num_classes)
+        self.cm_rgb_bn1 = nn.BatchNorm2d(64)
+        self.cm_rgb_relu = nn.ReLU(inplace=True)
+        self.cm_rgb_maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.cm_rgb_layer1 = self._make_layer(block, 64, layers[0])
+        self.cm_rgb_layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.cm_rgb_layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.cm_rgb_cma1= self._make_cma_layer(cmaBlock, 256,stride=1)
+        self.cm_rgb_layer4 = self._make_layer(block, 512, layers[3], stride=2, noBN=self.noBN)
+        self.cm_rgb_avgpool = nn.AvgPool2d(7, stride=1)
+        self.cm_rgb_fc = nn.Linear(512 * block.expansion, num_classes)
         for m in self.modules():
+            #print("2222222222",m)
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0, math.sqrt(2. / n))
@@ -216,12 +217,10 @@ class doubleResNet(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
         #initialize weight of cma_batchnorm as 0:
-
+            
             #trovare nome
     def _make_cma_layer(self,block,planes,stride=1):
-        layers = []
-        layers.append(cmaBlock(planes,planes,stride))
-        return nn.Sequential(*layers)
+        return nn.Module(cmaBlock(planes,stride))
 
     def _make_layer(self, block, planes, blocks, stride=1, noBN=False):
         downsample = None
@@ -290,7 +289,7 @@ def crossModresnet34(pretrained=False, noBN=False, **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model1 = doubleResNet(BasicBlock, [3, 4, 6, 3], noBN=noBN, **kwargs)
+    model = doubleResNet(BasicBlock, [3, 4, 6, 3], noBN=noBN, **kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['resnet34']), strict=False)
     return model
