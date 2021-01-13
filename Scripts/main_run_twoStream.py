@@ -31,6 +31,9 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
     # Setting Device
     DEVICE = "cuda"
 
+    #debug
+    print(LSTA)
+
     if LSTA is True:
         model_folder = os.path.join('./', outDir, dataset, 'twoStream_LSTA')  # Dir for saving models and log files
     else:
@@ -76,10 +79,10 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
 
     if LSTA is True:
         model = twoStreamAttentionModel(flowModel=flowModel, frameModel=rgbModel, stackSize=stackSize, memSize=memSize,
-                                        num_classes=num_classes, c_cam_classes=100, LSTA=True)
+                                        num_classes=num_classes, c_cam_classes=100, LSTA=LSTA)
     else:
         model = twoStreamAttentionModel(flowModel=flowModel, frameModel=rgbModel, stackSize=stackSize, memSize=memSize,
-                                        num_classes=num_classes, LSTA=False)
+                                        num_classes=num_classes)
 
 
     for params in model.parameters():
