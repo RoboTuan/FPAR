@@ -1,5 +1,6 @@
 import torch
 from ML_DL_Project.Scripts.resnetMod import *
+from ML_DL_Project.Scripts.flow_resnet import *
 
 def change_key_names(flow_model_path,frame_model_path,out_path_flow,out_path_frame):
 
