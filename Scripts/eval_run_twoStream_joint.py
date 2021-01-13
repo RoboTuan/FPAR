@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from ML_DL_Project.Scripts.makeDatasetTwoStream import *
 import argparse
 
-def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize):
+def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize, LSTA):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -41,7 +41,11 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
     
     actions =vid_seq_test.__getLabel__()
 
-    model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes)
+    if LSTA is True:
+        model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes, LSTA)
+    else:
+        model = twoStreamAttentionModel(stackSize=5, memSize=512, num_classes=num_classes)
+    
     model.load_state_dict(torch.load(model_state_dict))
 
 
@@ -97,6 +101,7 @@ def __main__(argv=None):
     parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--stackSize', type=int, default=5, help='Number of optical flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
+    parser.add_argument('--LSTA', type=bool, default=False, help='LSTA rgb netowkr')
 
     #args = parser.parse_args()
     args, _ = parser.parse_known_args(argv)
@@ -107,7 +112,8 @@ def __main__(argv=None):
     seqLen = args.seqLen
     stackSize = args.stackSize
     memSize = args.memSize
+    LSTA = args.LSTA
 
 
-    main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
+    main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize, LSTA)
 #__main__()
