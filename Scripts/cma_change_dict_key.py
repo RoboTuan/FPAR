@@ -12,7 +12,6 @@ def change_key_names(flow_model_path,frame_model_path,out_path_flow,out_path_fra
     state_dict = flowModel.state_dict()
     state_dict_v2 = copy.deepcopy(state_dict)
     for key in state_dict:
-      print(key)
       state_dict_v2['cm_fl_' + key] = state_dict_v2.pop(key)
 
     flowModelB.load_state_dict(state_dict_v2,strict=False)
