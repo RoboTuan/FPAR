@@ -1,7 +1,7 @@
 import torch
 from ML_DL_Project.Scripts.resnetMod import *
 from ML_DL_Project.Scripts.flow_resnet import *
-
+import copy 
 def change_key_names(flow_model_path,frame_model_path,out_path_flow,out_path_frame):
     
     flowModel = flow_resnet34(False, channels=10, num_classes=61)
