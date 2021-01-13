@@ -2,7 +2,7 @@ from __future__ import print_function, division
 from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
 import torch.nn as nn
-#from ML_DL_Project.Scripts.twoStreamModel import *
+from ML_DL_Project.Scripts.twoStreamModel import *
 from torch.autograd import Variable
 from torch.utils.data.sampler import WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
