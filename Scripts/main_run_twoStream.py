@@ -2,7 +2,7 @@ from __future__ import print_function, division
 from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
                                 RandomHorizontalFlip)
 import torch.nn as nn
-from ML_DL_Project.Scripts.twoStreamModel import *
+#from ML_DL_Project.Scripts.twoStreamModel import *
 from torch.autograd import Variable
 from torch.utils.data.sampler import WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
@@ -13,7 +13,7 @@ import sys
 
 
 def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
-             trainBatchSize, valBatchSize, lr1, numEpochs, decayRate, stepSize):
+             trainBatchSize, valBatchSize, lr1, numEpochs, decayRate, stepSize, LSTA):
 
 
     if dataset == 'gtea61':
@@ -31,7 +31,10 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', outDir, dataset, 'twoStream')  # Dir for saving models and log files
+    if LSTA is True:
+        model_folder = os.path.join('./', outDir, dataset, 'twoStream_LSTA')  # Dir for saving models and log files
+    else:
+        model_folder = os.path.join('./', outDir, dataset, 'twoStream')  # Dir for saving models and log files
     # Create the dir
     if os.path.exists(model_folder):
         print('Dir {} exists!'.format(model_folder))
@@ -71,10 +74,13 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
                                 shuffle=False, num_workers=2, pin_memory=True)
         valSamples = vid_seq_val.__len__()
 
-        
+    if LSTA is True:
+        model = twoStreamAttentionModel(flowModel=flowModel, frameModel=rgbModel, stackSize=stackSize, memSize=memSize,
+                                        num_classes=num_classes, c_cam_classes=100, LSTA=True)
+    else:
+        model = twoStreamAttentionModel(flowModel=flowModel, frameModel=rgbModel, stackSize=stackSize, memSize=memSize,
+                                        num_classes=num_classes, LSTA=False)
 
-    model = twoStreamAttentionModel(flowModel=flowModel, frameModel=rgbModel, stackSize=stackSize, memSize=memSize,
-                                        num_classes=num_classes)
 
     for params in model.parameters():
         params.requires_grad = False
@@ -85,10 +91,15 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
     for params in model.classifier.parameters():
         params.requires_grad = True
         train_params += [params]
-
-    for params in model.frameModel.lstm_cell.parameters():
-        train_params += [params]
-        params.requires_grad = True
+        
+    if LSTA is True:
+        for params in model.frameModel.lsta_cell.parameters():
+            train_params += [params]
+            params.requires_grad = True
+    else:
+         for params in model.frameModel.lstm_cell.parameters():
+            train_params += [params]
+            params.requires_grad = True     
 
     for params in model.frameModel.resNet.layer4[0].conv1.parameters():
         params.requires_grad = True
@@ -237,6 +248,7 @@ def __main__(argv=None):
     parser.add_argument('--stepSize', type=float, default=1, help='Learning rate decay step')
     parser.add_argument('--decayRate', type=float, default=0.99, help='Learning rate decay rate')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
+    parser.add_argument('--LSTA', type=bool, default=False, help='LSTA rgb netowkr')
 
     args, _ = parser.parse_known_args(argv)
 
@@ -255,6 +267,7 @@ def __main__(argv=None):
     stepSize = args.stepSize
     decayRate = args.decayRate
     memSize = args.memSize
+    LSTA = args.LSTA
 
     main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
-             trainBatchSize, valBatchSize, lr1, numEpochs, stepSize, decayRate)
+             trainBatchSize, valBatchSize, lr1, numEpochs, stepSize, decayRate, LSTA)
