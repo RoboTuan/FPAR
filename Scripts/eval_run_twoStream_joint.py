@@ -25,6 +25,9 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize,
 
     DEVICE = "cuda"
 
+    #debug
+    print(LSTA)
+
     mean=[0.485, 0.456, 0.406]
     std=[0.229, 0.224, 0.225]
 
@@ -101,7 +104,7 @@ def __main__(argv=None):
     parser.add_argument('--seqLen', type=int, default=25, help='Length of sequence')
     parser.add_argument('--stackSize', type=int, default=5, help='Number of optical flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
-    parser.add_argument('--LSTA', type=bool, default=False, help='LSTA rgb netowkr')
+    parser.add_argument('--LSTA', type=bool, default=False, help='LSTA rgb network')
 
     #args = parser.parse_args()
     args, _ = parser.parse_known_args(argv)
