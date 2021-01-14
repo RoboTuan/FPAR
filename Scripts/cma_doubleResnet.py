@@ -192,7 +192,7 @@ def resnet34(pretrained=False, noBN=False, **kwargs):
 
 class doubleResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, noBN=False):
+    def __init__(self, block, layers, num_classes=1000,fl_num_classes=61, noBN=False,channels=10):
         self.inplanes = 64
         self.noBN = noBN
         super(doubleResNet, self).__init__()
@@ -204,12 +204,29 @@ class doubleResNet(nn.Module):
         self.cm_rgb_layer1 = self._make_layer(block, 64, layers[0])
         self.cm_rgb_layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.cm_rgb_layer3 = self._make_layer(block, 256, layers[2], stride=2)
-        self.cm_rgb_cma1= self._make_cma_layer(cmaBlock, 256,stride=1)
+        self.cm_rgb_cma1= cmaBlock(256, stride=1)
         self.cm_rgb_layer4 = self._make_layer(block, 512, layers[3], stride=2, noBN=self.noBN)
         self.cm_rgb_avgpool = nn.AvgPool2d(7, stride=1)
         self.cm_rgb_fc = nn.Linear(512 * block.expansion, num_classes)
+
+        #2nd resnet34 for flow processing
+        super(doubleResNet, self).__init__()
+        self.cm_fl_conv1 = nn.Conv2d(channels, 64, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+        self.cm_fl_bn1 = nn.BatchNorm2d(64)
+        self.cm_fl_relu = nn.ReLU(inplace=True)
+        self.cm_fl_maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.cm_fl_layer1 = self._make_layer(block, 64, layers[0])
+        self.cm_fl_layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.cm_fl_layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.cm_fl_cma1= cmaBlock(256, stride=1)
+        self.cm_fl_layer4 = self._make_layer(block, 512, layers[3], stride=2)
+        self.cm_fl_avgpool = nn.AvgPool2d(7)
+        self.dp = nn.Dropout(p=0.5)
+        self.cm_fl_fc = nn.Linear(512 * block.expansion, fl_num_classes)
+        
+        
         for m in self.modules():
-            #print("2222222222",m)
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0, math.sqrt(2. / n))
@@ -219,10 +236,8 @@ class doubleResNet(nn.Module):
         #initialize weight of cma_batchnorm as 0:
             
             #trovare nome
-    def _make_cma_layer(self,block,planes,stride=1):
-        return nn.Module(cmaBlock(planes,stride))
 
-    def _make_layer(self, block, planes, blocks, stride=1, noBN=False):
+    def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
@@ -235,20 +250,10 @@ class doubleResNet(nn.Module):
         layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
         # print('blocks = ', blocks)
-        if noBN is False:
-            # print('with BN')
-            for i in range(1, blocks):
-                layers.append(block(self.inplanes, planes))
-        else:
-            # print('no BN')
-            if blocks > 2:
-                # print('blocks > 2')
-                for i in range(1, blocks-1):
-                    layers.append(block(self.inplanes, planes))
-                layers.append(block(self.inplanes, planes, noBN=True))
-            else:
-                # print('blocks <= 2')
-                layers.append(block(self.inplanes, planes, noBN=True))
+        
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
+        
 
         return nn.Sequential(*layers)
 
@@ -266,9 +271,6 @@ class doubleResNet(nn.Module):
             conv_layer4BN, conv_layer4NBN = self.layer4_cm_rgb(x)
         else:
             conv_layer4BN = self.layer4_cm_rgb(x)
-
-        # Debugging print to see if this avgpoll is a GAP
-        # Yes, it's a GAP, because:
         # conv_layer4BN.size() is equal to [32, 512, 7, 7]
         # and the avgpool is performed with a kernel of 7x7,
         #print(conv_layer4BN.size())
@@ -304,3 +306,26 @@ def resnet34(pretrained=False, noBN=False, **kwargs):
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['resnet34']), strict=False)
     return model
+
+
+
+def change_key_names(old_params, in_channels):
+    new_params = collections.OrderedDict()
+    layer_count = 0
+    allKeyList = old_params.keys()
+    for layer_key in allKeyList:
+        if layer_count >= len(allKeyList) - 2:
+            # exclude fc layers
+            continue
+        else:
+            if layer_count == 0:
+                rgb_weight = old_params[layer_key].data
+                rgb_weight_mean = torch.mean(rgb_weight, dim=1)
+                flow_weight = rgb_weight_mean.unsqueeze(1).repeat(1, in_channels, 1, 1)
+                new_params[layer_key] = flow_weight
+                layer_count += 1
+            else:
+                new_params[layer_key] = old_params[layer_key]
+                layer_count += 1
+
+    return new_params
