@@ -205,7 +205,7 @@ class doubleResNet(nn.Module):
         self.cm_rgb_layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.cm_rgb_layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.cm_rgb_cma1= cmaBlock(256, stride=1)
-        self.cm_rgb_layer4 = self._make_layer(block, 512, layers[3], stride=2, noBN=self.noBN)
+        self.cm_rgb_layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.cm_rgb_avgpool = nn.AvgPool2d(7, stride=1)
         self.cm_rgb_fc = nn.Linear(512 * block.expansion, num_classes)
 
