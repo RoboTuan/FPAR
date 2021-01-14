@@ -176,20 +176,7 @@ class ResNet(nn.Module):
             return x, conv_layer4BN, conv_layer4NBN
         else:
             return x, conv_layer4BN
-
-def resnet34(pretrained=False, noBN=False, **kwargs):
-    """Constructs a ResNet-34 model.
-
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-    """
-    model = ResNet(BasicBlock, [3, 4, 6, 3], noBN=noBN, **kwargs)
-    if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet34']), strict=False)
-    return model
-
-
-
+            
 class doubleResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000,fl_num_classes=61,noBN=False,channels=10):
@@ -210,7 +197,6 @@ class doubleResNet(nn.Module):
         self.cm_rgb_fc = nn.Linear(512 * block.expansion, num_classes)
 
         #2nd resnet34 for flow processing
-        super(doubleResNet, self).__init__()
         self.cm_fl_conv1 = nn.Conv2d(channels, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.cm_fl_bn1 = nn.BatchNorm2d(64)
@@ -233,7 +219,11 @@ class doubleResNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-            elif isinstance(m, )
+            elif isinstance(m, cmaBlock): 
+              for mm in m.modules():
+                if isinstance(mm, nn.BatchNorm2d):
+                  mm.weight.data.fill_(0)
+                  mm.bias.data.zero_()
         #initialize weight of cma_batchnorm as 0:
             
             #trovare nome
@@ -321,7 +311,7 @@ class doubleResNet(nn.Module):
         else:
             return x, conv_layer4BN, y ,y1
 
-def crossModresnet34(pretrained=False, noBN=False, **kwargs):
+def crossModresnet34(rgb_model_dict_PATH, flow_model_dict_PATH, pretrained=False, noBN=False, **kwargs):
     """Constructs a ResNet-34 model.
 
     Args:
@@ -329,44 +319,9 @@ def crossModresnet34(pretrained=False, noBN=False, **kwargs):
     """
     model = doubleResNet(BasicBlock, [3, 4, 6, 3], noBN=noBN, **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet34']), strict=False)
+        model.load_state_dict(torch.load(rgb_model_dict_PATH), strict=False)
+        model.load_state_dict(torch.load(flow_model_dict_PATH), strict=False)
     return model
-
-def resnet34(pretrained=False, noBN=False, **kwargs):
-    """Constructs a ResNet-34 model.
-
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-    """
-    model = ResNet(BasicBlock, [3, 4, 6, 3], noBN=noBN, **kwargs)
-    if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet34']), strict=False)
-    return model
-
-
-def flow_resnet34(pretrained=False, channels=20, num_classes=61):
-    """Constructs a ResNet-34 model.
-
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-    """
-    model = ResNet(BasicBlock, [3, 4, 6, 3], channels=channels, num_classes=num_classes)
-
-    if pretrained:
-        in_channels = channels
-        pretrained_dict = model_zoo.load_url(model_urls['resnet34'])
-        model_dict = model.state_dict()
-
-        new_pretrained_dict = change_key_names(pretrained_dict, in_channels)
-        # 1. filter out unnecessary keys
-        new_pretrained_dict = {k: v for k, v in new_pretrained_dict.items() if k in model_dict}
-        # 2. overwrite entries in the existing state dict
-        model_dict.update(new_pretrained_dict)
-        # 3. load the new state dict
-        model.load_state_dict(model_dict)
-
-    return model
-
 
 def change_key_names(old_params, in_channels):
     new_params = collections.OrderedDict()
