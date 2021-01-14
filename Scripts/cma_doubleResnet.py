@@ -308,6 +308,29 @@ def resnet34(pretrained=False, noBN=False, **kwargs):
     return model
 
 
+def flow_resnet34(pretrained=False, channels=20, num_classes=61):
+    """Constructs a ResNet-34 model.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNet(BasicBlock, [3, 4, 6, 3], channels=channels, num_classes=num_classes)
+
+    if pretrained:
+        in_channels = channels
+        pretrained_dict = model_zoo.load_url(model_urls['resnet34'])
+        model_dict = model.state_dict()
+
+        new_pretrained_dict = change_key_names(pretrained_dict, in_channels)
+        # 1. filter out unnecessary keys
+        new_pretrained_dict = {k: v for k, v in new_pretrained_dict.items() if k in model_dict}
+        # 2. overwrite entries in the existing state dict
+        model_dict.update(new_pretrained_dict)
+        # 3. load the new state dict
+        model.load_state_dict(model_dict)
+
+    return model
+
 
 def change_key_names(old_params, in_channels):
     new_params = collections.OrderedDict()
