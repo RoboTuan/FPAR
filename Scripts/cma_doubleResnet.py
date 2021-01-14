@@ -192,7 +192,7 @@ def resnet34(pretrained=False, noBN=False, **kwargs):
 
 class doubleResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000,fl_num_classes=61, noBN=False,channels=10):
+    def __init__(self, block, layers, num_classes=1000,fl_num_classes=61,noBN=False,channels=10):
         self.inplanes = 64
         self.noBN = noBN
         super(doubleResNet, self).__init__()
@@ -205,7 +205,7 @@ class doubleResNet(nn.Module):
         self.cm_rgb_layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.cm_rgb_layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.cm_rgb_cma1= cmaBlock(256, stride=1)
-        self.cm_rgb_layer4 = self._make_layer(block, 512, layers[3], stride=2)
+        self.cm_rgb_layer4 = self._make_layer(block, 512, layers[3], stride=2,noBN=self.noBN)
         self.cm_rgb_avgpool = nn.AvgPool2d(7, stride=1)
         self.cm_rgb_fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -233,11 +233,12 @@ class doubleResNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
+            elif isinstance(m, )
         #initialize weight of cma_batchnorm as 0:
             
             #trovare nome
 
-    def _make_layer(self, block, planes, blocks, stride=1):
+    def _make_layer(self, block, planes, blocks, stride=1, noBN=False):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
@@ -250,40 +251,75 @@ class doubleResNet(nn.Module):
         layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
         # print('blocks = ', blocks)
-        
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
-        
+        if noBN is False:
+            # print('with BN')
+            for i in range(1, blocks):
+                layers.append(block(self.inplanes, planes))
+        else:
+            # print('no BN')
+            if blocks > 2:
+                # print('blocks > 2')
+                for i in range(1, blocks-1):
+                    layers.append(block(self.inplanes, planes))
+                layers.append(block(self.inplanes, planes, noBN=True))
+            else:
+                # print('blocks <= 2')
+                layers.append(block(self.inplanes, planes, noBN=True))
 
         return nn.Sequential(*layers)
 
     def forward(self, y, x):
-        x = self.conv1_cm_rgb(x)
-        x = self.bn1_cm_rgb(x)
-        x = self.relu_cm_rgb(x)
-        x = self.maxpool_cm_rgb(x)
+        x = self.cm_rgb_conv1(x)
+        y = self.cm_fl_conv1(y)
 
-        x = self.layer1_cm_rgb(x)
-        x = self.layer2_cm_rgb(x)
-        x = self.layer3_cm_rgb(x)
-        x = self.cma1_cm_rgb(x,y) 
+        x = self.cm_rgb_bn1(x)
+        y = self.cm_fl_bn1(y)
+        
+        x = self.cm_rgb_relu(x)
+        y = self.cm_fl_relu(y)
+
+        x = self.cm_rgb_maxpool(x)
+        y = self.cm_fl_maxpool(y)
+
+        x = self.cm_rgb_layer1(x)
+        y = self.cm_fl_layer1(y)
+
+        x = self.cm_rgb_layer2(x)
+        y = self.cm_fl_layer2(y)
+
+        x = self.cm_rgb_layer3(x)
+        y = self.cm_fl_layer3(x)
+
+        x = self.cm_rgb_cma1(x,y) 
+        y = self.cm_fl_cma1(y,x)
+        
         if self.noBN:
-            conv_layer4BN, conv_layer4NBN = self.layer4_cm_rgb(x)
+            conv_layer4BN, conv_layer4NBN = self.cm_rgb_layer4(x)
         else:
-            conv_layer4BN = self.layer4_cm_rgb(x)
+            conv_layer4BN = self.cm_rgb_layer4(x)
+        
+        y = self.cm_fl_layer4(y)
+
         # conv_layer4BN.size() is equal to [32, 512, 7, 7]
         # and the avgpool is performed with a kernel of 7x7,
         #print(conv_layer4BN.size())
-        x = self.avgpool_cm_rgb(conv_layer4BN)
+        x = self.cm_rg_avgpool(conv_layer4BN)
+        y = self.cm_fl_avgpool(y)
+
         # x.size() after the GAP is equal to  [32, 512, 1, 1] as expected
         #print(x.size())
         x = x.view(x.size(0), -1)
-        x = self.fc(x)
-        if self.noBN:
-            return x, conv_layer4BN, conv_layer4NBN
-        else:
-            return x, conv_layer4BN
+        y1 = y.view(y.size(0),-1)
 
+        y = self.dp(y1)
+
+        x = self.cm_rgb_fc(x)
+        y = self.cm_fl_fc(y)
+
+        if self.noBN:
+            return x, conv_layer4BN, conv_layer4NBN ,y
+        else:
+            return x, conv_layer4BN, y ,y1
 
 def crossModresnet34(pretrained=False, noBN=False, **kwargs):
     """Constructs a ResNet-34 model.
