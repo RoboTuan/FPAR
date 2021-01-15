@@ -4,7 +4,7 @@ import math
 import torch.utils.model_zoo as model_zoo
 
 
-__all__ = [ 'crossModresnet34']
+#__all__ = ['crossModresnet34']
 
 
 model_urls = {
