@@ -86,40 +86,48 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
         params.requires_grad = True
         train_params += [params]
 
-    for params in model.frameModel.lstm_cell.parameters():
+    for params in model.Model.lstm_cell.parameters():
         train_params += [params]
         params.requires_grad = True
-
-    for params in model.frameModel.resNet.layer4[0].conv1.parameters():
-        params.requires_grad = True
-        train_params += [params]
-
-    for params in model.frameModel.resNet.layer4[0].conv2.parameters():
+    
+    for params in model.Model.resNet.cm_rgb_cma1.parameters():
         params.requires_grad = True
         train_params += [params]
 
-    for params in model.frameModel.resNet.layer4[1].conv1.parameters():
+    for params in model.Model.resNet.cm_rgb_layer4[0].conv1.parameters():
         params.requires_grad = True
         train_params += [params]
 
-    for params in model.frameModel.resNet.layer4[1].conv2.parameters():
+    for params in model.Model.resNet.cm_rgb_layer4[0].conv2.parameters():
         params.requires_grad = True
         train_params += [params]
 
-    for params in model.frameModel.resNet.layer4[2].conv1.parameters():
+    for params in model.Model.resNet.cm_rgb_layer4[1].conv1.parameters():
+        params.requires_grad = True
+        train_params += [params]
+
+    for params in model.Model.resNet.cm_rgb_layer4[1].conv2.parameters():
+        params.requires_grad = True
+        train_params += [params]
+
+    for params in model.Model.resNet.cm_rgb_layer4[2].conv1.parameters():
         params.requires_grad = True
         train_params += [params]
     #
-    for params in model.frameModel.resNet.layer4[2].conv2.parameters():
+    for params in model.Model.resNet.cm_rgb_layer4[2].conv2.parameters():
         params.requires_grad = True
         train_params += [params]
     #
-    for params in model.frameModel.resNet.fc.parameters():
+    for params in model.Model.resNet.cm_rgb_fc.parameters():
         params.requires_grad = True
         train_params += [params]
 
     base_params = []
-    for params in model.flowModel.layer4.parameters():
+    for params in model.Model.cm_fl_layer4.parameters():
+        base_params += [params]
+        params.requires_grad = True
+    
+    for params in model.Model.cm_fl_cma1.parameters():
         base_params += [params]
         params.requires_grad = True
 
