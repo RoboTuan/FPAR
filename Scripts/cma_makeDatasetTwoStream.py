@@ -81,7 +81,7 @@ class makeDataset2Stream(Dataset):
                     startFrame = random.randint(1, numFrame - self.stackSize)
             else:
                     startFrame = startFrame = np.ceil((numFrame - self.stackSize)/2)
-            for i in range(self.seqLen):
+            for j in range(self.seqLen):
                 inpSeq = []
                 for k in range(self.stackSize):
                     i = k + int(startFrame)
