@@ -48,7 +48,7 @@ class doubleresnet_lstm_Model(nn.Module):
             # The logits are the result of the last layer of the cnn (the raw ouput) without softmax
             # Pass the image to the resnet and get back the featuremap at the end of the resnet in "logit"
             # get returned in feature_conv and feature_convNBN the features map of the 4th layer of the resnet
-            logit, feature_conv, feature_convNBN, flow_features = self.resNet(inputVariableFlow[t],inputVariableFrame)
+            logit, feature_conv, feature_convNBN, flow_features = self.resNet(inputVariableFlow[t],inputVariableFrame[t])
             #stack the flow features along a new dimension:
             flow_features_maps.append(flow_features)
             bz, nc, h, w = feature_conv.size()
