@@ -1,6 +1,6 @@
 import torch
 # For Colab:
-import ML_DL_Project.Scripts.cma_doubleResnet as doubleResNet
+from ML_DL_Project.Scripts.cma_doubleResnet import *
 # For local:
 #import resnetMod
 import torch.nn as nn
@@ -22,7 +22,7 @@ class doubleresnet_lstm_Model(nn.Module):
         super(doubleresnet_lstm_Model, self).__init__()
         self.num_classes = num_classes
         # Initialize the ResNet
-        self.resNet = doubleResnet.crossModresnet34(flowModel, rgbModel, True, True)
+        self.resNet = crossModresnet34(flowModel, rgbModel, True, True)
         self.mem_size = mem_size
         # Get the weighs of the last fc layer of the ResNet,
         # we need this to comput the CAM and the attentionMAP
