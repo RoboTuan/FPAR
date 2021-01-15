@@ -55,8 +55,8 @@ class BasicBlock(nn.Module):
         if self.noBN is False:
             return outBN
         else:
-            out = out + residual
-            return outBN, out
+            outBN = out + residual
+            return outBN
 
 class cmaBlock(nn.Module):
     expansion = 1
