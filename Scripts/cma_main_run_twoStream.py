@@ -123,11 +123,11 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
         train_params += [params]
 
     base_params = []
-    for params in model.Model.cm_fl_layer4.parameters():
+    for params in model.Model.resNet.cm_fl_layer4.parameters():
         base_params += [params]
         params.requires_grad = True
     
-    for params in model.Model.cm_fl_cma1.parameters():
+    for params in model.Model.resNet.cm_fl_cma1.parameters():
         base_params += [params]
         params.requires_grad = True
 
