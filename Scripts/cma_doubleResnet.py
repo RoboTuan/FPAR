@@ -178,7 +178,7 @@ class doubleResNet(nn.Module):
 
         x = self.cm_rgb_maxpool(x)
         y = self.cm_fl_maxpool(y)
-        print(y.size())
+
 
         x = self.cm_rgb_layer1(x)
         y = self.cm_fl_layer1(y)
