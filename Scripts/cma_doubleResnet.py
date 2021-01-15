@@ -309,9 +309,9 @@ class doubleResNet(nn.Module):
         if self.noBN:
             return x, conv_layer4BN, conv_layer4NBN ,y
         else:
-            return x, conv_layer4BN, y ,y1
+            return x, conv_layer4BN, y1
 
-def crossModresnet34(rgb_model_dict_PATH, flow_model_dict_PATH, pretrained=False, noBN=False, **kwargs):
+def crossModresnet34(flow_model_dict_PATH, rgb_model_dict_PATH, pretrained=False, noBN=False, **kwargs):
     """Constructs a ResNet-34 model.
 
     Args:
