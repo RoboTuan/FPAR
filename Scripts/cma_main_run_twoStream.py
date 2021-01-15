@@ -152,7 +152,7 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
         numCorrTrain = 0
         iterPerEpoch = 0
         model.classifier.train(True)
-        model.flowModel.layer4.train(True)
+        model.Model.resNet.cm_fl_layer4.train(True)
         for j, (inputFlow, inputFrame, targets) in enumerate(train_loader):
             train_iter += 1
             iterPerEpoch += 1
