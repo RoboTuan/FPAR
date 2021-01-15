@@ -110,7 +110,7 @@ class doubleResNet(nn.Module):
         self.cm_fl_bn1 = nn.BatchNorm2d(64)
         self.cm_fl_relu = nn.ReLU(inplace=True)
         self.cm_fl_maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.cm_fl_layer1 = self._make_layer(block, 64, layers[0])
+        self.cm_fl_layer1 = self._make_layer(block, 64, layers[0], noBN=False)
         self.cm_fl_layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.cm_fl_layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.cm_fl_cma1= cmaBlock(256, stride=1)
