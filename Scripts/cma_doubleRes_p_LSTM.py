@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.autograd import Variable
 # For Colab
-from ML_DL_Project.Scripts.cma_doubleResnet import *
+#from ML_DL_Project.Scripts.cma_doubleResnet import *
 # For local:
 #from MyConvLSTMCell import *
 
