@@ -110,11 +110,11 @@ class doubleResNet(nn.Module):
         self.cm_fl_bn1 = nn.BatchNorm2d(64)
         self.cm_fl_relu = nn.ReLU(inplace=True)
         self.cm_fl_maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.cm_fl_layer1 = self._make_layer(block, 64, layers[0])
-        self.cm_fl_layer2 = self._make_layer(block, 128, layers[1], stride=2)
-        self.cm_fl_layer3 = self._make_layer(block, 256, layers[2], stride=2)
+        self.cm_fl_layer1 = self._make_layer_flow(block, 64, layers[0])
+        self.cm_fl_layer2 = self._make_layer_flow(block, 128, layers[1], stride=2)
+        self.cm_fl_layer3 = self._make_layer_flow(block, 256, layers[2], stride=2)
         self.cm_fl_cma1= cmaBlock(256, stride=1)
-        self.cm_fl_layer4 = self._make_layer(block, 512, layers[3], stride=2)
+        self.cm_fl_layer4 = self._make_layer_flow(block, 512, layers[3], stride=2)
         self.cm_fl_avgpool = nn.AvgPool2d(7)
         self.dp = nn.Dropout(p=0.5)
         self.cm_fl_fc = nn.Linear(512 * block.expansion, fl_num_classes)
@@ -183,7 +183,7 @@ class doubleResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-        
+
     def forward(self, y, x):
         x = self.cm_rgb_conv1(x)
         y = self.cm_fl_conv1(y)
