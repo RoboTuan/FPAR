@@ -31,7 +31,7 @@ class doubleresnet_lstm_Model(nn.Module):
         self.lstm_cell = MyConvLSTMCell(512, mem_size)
         # Here I initialize another avgpool needed after the convLSTM
         self.avgpool = nn.AvgPool2d(7)
-        self.conv1_1 = nn.Conv2d(seqLen, 1, kernel_size=1, stride = stride, padding =1 , bias=False)
+        self.conv1_1 = nn.Conv2d(seqLen, 1, kernel_size=1, stride = 1, padding =1 , bias=False)
         self.dropout = nn.Dropout(0.7)
         # Here I initialize the last classifier
         self.fc = nn.Linear(mem_size, self.num_classes)
