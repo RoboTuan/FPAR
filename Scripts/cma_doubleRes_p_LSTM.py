@@ -9,7 +9,7 @@ from torch.autograd import Variable
 # For Colab
 #from ML_DL_Project.Scripts.cma_doubleResnet import *
 # For local:
-#from MyConvLSTMCell import *
+from MyConvLSTMCell import *
 
 
 class doubleresnet_lstm_Model(nn.Module):
