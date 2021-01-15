@@ -6,7 +6,7 @@ from ML_DL_Project.Scripts.cmaModel import *
 from torch.autograd import Variable
 from torch.utils.data.sampler import WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
-from ML_DL_Project.Scripts.makeDatasetTwoStream import *
+from ML_DL_Project.Scripts.cma_makeDatasetTwoStream import *
 import argparse
 
 import sys
