@@ -26,7 +26,7 @@ class doubleresnet_lstm_Model(nn.Module):
         self.mem_size = mem_size
         # Get the weighs of the last fc layer of the ResNet,
         # we need this to comput the CAM and the attentionMAP
-        self.weight_softmax = self.resNet.cma_rgb_fc.weight
+        self.weight_softmax = self.resNet.cm_rgb_fc.weight
         # Initialize the convLSTM
         self.lstm_cell = MyConvLSTMCell(512, mem_size)
         # Here I initialize another avgpool needed after the convLSTM
