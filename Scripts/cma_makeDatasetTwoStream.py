@@ -88,7 +88,7 @@ class makeDataset2Stream(Dataset):
                     fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + '.png'
                     img = Image.open(fl_name)
                     inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
-                inpSeqSegs.append(torch.stack(inpSeq, 0).squeeze())
+                inpSeq.append(torch.stack(inpSeq, 0).squeeze())
             inpSeqSegs = torch.stack(inpSeqSegs, 0)
         else:
             if numFrame <= self.stackSize:
