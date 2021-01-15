@@ -39,15 +39,15 @@ class doubleresnet_lstm_Model(nn.Module):
 
     def forward(self, inputVariableFlow, inputVariableFrame):
         # Initialize states for the convolutional lstm cell
-        state = (Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()),
-                 Variable(torch.zeros((inputVariable.size(1), self.mem_size, 7, 7)).cuda()))
+        state = (Variable(torch.zeros((inputVariableFrame.size(1), self.mem_size, 7, 7)).cuda()),
+                 Variable(torch.zeros((inputVariableFrame.size(1), self.mem_size, 7, 7)).cuda()))
         flow_features_maps = []
         # Iterate over temporally sequential images 
-        for t in range(inputVariable.size(0)):
+        for t in range(inputVariableFrame.size(0)):
             # The logits are the result of the last layer of the cnn (the raw ouput) without softmax
             # Pass the image to the resnet and get back the featuremap at the end of the resnet in "logit"
             # get returned in feature_conv and feature_convNBN the features map of the 4th layer of the resnet
-            logit, feature_conv, feature_convNBN, flow_features = self.resNet(inputVariable[t])
+            logit, feature_conv, feature_convNBN, flow_features = self.resNet(inputVariableFlow[t],inputVariableFrame[t])
             #stack the flow features along a new dimension:
             flow_features_maps.append(flow_features)
             bz, nc, h, w = feature_conv.size()
