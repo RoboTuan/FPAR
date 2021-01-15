@@ -31,7 +31,7 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
     # Setting Device
     DEVICE = "cuda"
 
-    model_folder = os.path.join('./', outDir, dataset, 'twoStream')  # Dir for saving models and log files
+    model_folder = os.path.join('./', outDir, dataset, 'crossModAtt')  # Dir for saving models and log files
     # Create the dir
     if os.path.exists(model_folder):
         print('Dir {} exists!'.format(model_folder))
