@@ -110,7 +110,7 @@ class doubleResNet(nn.Module):
         self.cm_fl_bn1 = nn.BatchNorm2d(64)
         self.cm_fl_relu = nn.ReLU(inplace=True)
         self.cm_fl_maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.cm_fl_layer1 = self._make_layer(block, 64, layers[0], noBN=False)
+        self.cm_fl_layer1 = self._make_layer(block, 64, layers[0])
         self.cm_fl_layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.cm_fl_layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.cm_fl_cma1= cmaBlock(256, stride=1)
@@ -165,7 +165,25 @@ class doubleResNet(nn.Module):
                 layers.append(block(self.inplanes, planes, noBN=True))
 
         return nn.Sequential(*layers)
+    
+    def _make_layer_flow(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                nn.Conv2d(self.inplanes, planes * block.expansion,
+                          kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
 
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample))
+        self.inplanes = planes * block.expansion
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
+
+        return nn.Sequential(*layers)
+
+        
     def forward(self, y, x):
         x = self.cm_rgb_conv1(x)
         y = self.cm_fl_conv1(y)
