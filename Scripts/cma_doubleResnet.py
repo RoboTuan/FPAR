@@ -89,6 +89,7 @@ class doubleResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000,fl_num_classes=61,noBN=False,channels=10):
         self.inplanes = 64
+        self.inplanes_flow = 64
         self.noBN = noBN
         super(doubleResNet, self).__init__()
         self.cm_rgb_conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -168,18 +169,18 @@ class doubleResNet(nn.Module):
     
     def _make_layer_flow(self, block, planes, blocks, stride=1):
         downsample = None
-        if stride != 1 or self.inplanes != planes * block.expansion:
+        if stride != 1 or self.inplanes_flow != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
+                nn.Conv2d(self.inplanes_flow, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
-        self.inplanes = planes * block.expansion
+        layers.append(block(self.inplanes_flow, planes, stride, downsample))
+        self.inplanes_flow = planes * block.expansion
         for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
+            layers.append(block(self.inplanes_flow, planes))
 
         return nn.Sequential(*layers)
 
@@ -205,7 +206,7 @@ class doubleResNet(nn.Module):
         y = self.cm_fl_layer2(y)
 
         x = self.cm_rgb_layer3(x)
-        y = self.cm_fl_layer3(x)
+        y = self.cm_fl_layer3(y)
 
         x = self.cm_rgb_cma1(x,y) 
         y = self.cm_fl_cma1(y,x)
