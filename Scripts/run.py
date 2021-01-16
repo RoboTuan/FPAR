@@ -1,4 +1,4 @@
-from ML_DL_Project.Scripts.cma_main_run_twoStream import *
+import ML_DL_Project.Scripts.cma_main_run_twoStream as cmr
 
 cross_mod_att = ["--trainDatasetDir", "./GTEA61",
               "--outDir", "outDir",
@@ -10,4 +10,4 @@ cross_mod_att = ["--trainDatasetDir", "./GTEA61",
               "--rgbModel", "./drive/MyDrive//model_rgb_state_dict.pth",  
 ]
 
-__main__(cross_mod_att)
+cmr.__main__(cross_mod_att)
