@@ -1,8 +1,28 @@
+from __future__ import print_function, division
 import torch.nn as nn
 import torch
 import math
 import torch.utils.model_zoo as model_zoo
+from torch.nn import functional as F
+from torch.autograd import Variable
+import os
+from torch.utils.data import Dataset
+from PIL import Image
+import numpy as np
+import random
+import glob
+import sys
+from ML_DL_Project.Scripts.MyConvLSTMCell import *
+from ML_DL_Project.Scripts.cma_makeDatasetTwoStream import *
+from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+                                RandomHorizontalFlip)
+import torch.nn as nn
+from torch.autograd import Variable
+from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.tensorboard import SummaryWriter
+import argparse
 
+import sys
 
 #__all__ = ['crossModresnet34']
 
@@ -272,19 +292,6 @@ def change_key_names(old_params, in_channels):
     return new_params
 
 
-import torch
-# For Colab:
-from ML_DL_Project.Scripts.cma_doubleResnet import *
-# For local:
-#import resnetMod
-import torch.nn as nn
-from torch.nn import functional as F
-from torch.autograd import Variable
-# For Colab
-#from ML_DL_Project.Scripts.cma_doubleResnet import *
-# For local:
-from ML_DL_Project.Scripts.MyConvLSTMCell import *
-
 
 class doubleresnet_lstm_Model(nn.Module):
     """
@@ -356,9 +363,6 @@ class doubleresnet_lstm_Model(nn.Module):
         feats = self.classifier(feats1)
         return feats, feats1, flow_feats
 
-import torch
-from ML_DL_Project.Scripts.cma_doubleRes_p_LSTM import *
-import torch.nn as nn
 
 
 class crossAttentionModel(nn.Module):
@@ -374,14 +378,6 @@ class crossAttentionModel(nn.Module):
         twoStreamFeats = torch.cat((flowFeats, rgbFeats), 1)
         return self.classifier(twoStreamFeats)
 
-import os
-import torch
-from torch.utils.data import Dataset
-from PIL import Image
-import numpy as np
-import random
-import glob
-import sys
 
 
 def gen_split(root_dir, stackSize):
@@ -500,20 +496,6 @@ class makeDataset2Stream(Dataset):
         return inpSeqSegs, inpSeqF, label#, vid_nameF#, fl_name
     def __getLabel__(self):
         return self.action
-
-from __future__ import print_function, division
-from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
-                                RandomHorizontalFlip)
-import torch.nn as nn
-from ML_DL_Project.Scripts.cmaModel import *
-from torch.autograd import Variable
-from torch.utils.data.sampler import WeightedRandomSampler
-from torch.utils.tensorboard import SummaryWriter
-from ML_DL_Project.Scripts.cma_makeDatasetTwoStream import *
-import argparse
-
-import sys
-
 
 def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
              trainBatchSize, valBatchSize, lr1, numEpochs, decayRate, stepSize):
