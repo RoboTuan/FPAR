@@ -762,4 +762,4 @@ cross_mod_att = ["--trainDatasetDir", "./GTEA61",
               "--rgbModel", "./drive/MyDrive//model_rgb_state_dict.pth",  
 ]
 
-cmr.__main__(cross_mod_att)
+__main__(cross_mod_att)
