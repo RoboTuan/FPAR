@@ -78,6 +78,8 @@ class doubleresnet_lstm_Model(nn.Module):
             state = self.lstm_cell(attentionFeat, state)
         feats1 = self.avgpool(state[1]).view(state[1].size(0), -1)
         flow_feats = torch.stack(flow_features_maps,0)
+        flow_feats = flow_feats.permute(1,0,2)
         flow_feats = self.avgpool_flow(flow_feats)
+        flow_feats = flow_feats.squeeze()
         feats = self.classifier(feats1)
         return feats, feats1, flow_feats
