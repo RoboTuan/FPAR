@@ -155,4 +155,4 @@ def __main__(argv=None):
     regression= args.regression
     Flow= args.Flow
 
-    main_run(dataset, model_state_dict, dataset_dir, seqLen, memSize, regression, Flow)
+    main_run(dataset, model_state_dict, dataset_dir, seqLen, stackSize, memSize, regression, Flow)
