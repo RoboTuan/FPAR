@@ -141,7 +141,7 @@ def __main__(argv=None):
     parser.add_argument('--stackSize', type=int, default=5, help='Number of opticl flow images in input')
     parser.add_argument('--memSize', type=int, default=512, help='ConvLSTM hidden state size')
     parser.add_argument('--regression', type=bool, default=True, help='Do the motion segmentation task (selfSup) with regression ')
-    parser.add_argument('--Flow', type=bool, default=True, help='Use warp flow or improved dense trajectories ')
+    parser.add_argument('--Flow', type=bool, default=False, help='Use warp flow or improved dense trajectories ')
 
 
     args, _ = parser.parse_known_args(argv)
