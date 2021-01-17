@@ -259,7 +259,7 @@ class doubleResNet(nn.Module):
         # conv_layer4BN.size() is equal to [32, 512, 7, 7]
         # and the avgpool is performed with a kernel of 7x7,
         #print(conv_layer4BN.size())
-        x = self.cm_rg_avgpool(conv_layer4BN)
+        x = self.cm_rgb_avgpool(conv_layer4BN)
         y = self.cm_fl_avgpool(y)
 
         # x.size() after the GAP is equal to  [32, 512, 1, 1] as expected
