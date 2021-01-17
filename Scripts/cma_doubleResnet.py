@@ -20,7 +20,7 @@ def conv3x3(in_planes, out_planes, stride=1):
 def conv1x1(in_planes, out_planes,stride=1):
     """1x1 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride,
-                     padding=1, bias=False)
+                     padding=0, bias=False)
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -55,8 +55,39 @@ class BasicBlock(nn.Module):
         if self.noBN is False:
             return outBN
         else:
-            outBN = out + residual
-            return outBN
+            out = out + residual
+            return outBN,out
+
+class BasicBlockFlow(nn.Module):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(BasicBlock, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        residual = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            residual = self.downsample(x)
+
+        out = out + residual
+        out = self.relu(out)
+
+        return out
 
 class cmaBlock(nn.Module):
     expansion = 1
@@ -68,17 +99,24 @@ class cmaBlock(nn.Module):
         self.convK = conv1x1(planes, int(planes/2), stride)
         self.convV = conv1x1(planes, int(planes/2), stride)
         self.convZ = conv1x1(int(planes/2), planes, stride)
-        self.softmax1 = torch.nn.Softmax()
+        self.softmax2d = torch.nn.Softmax2d()
         self.bn = nn.BatchNorm2d(planes)
         
 
     def forward(self, x, y):
         residual = x
         V = self.convV(y)
+        V = torch.flatten(V,2,3)
         Q = self.convQ(x)
+        Q = torch.flatten(Q,2,3)
         K = self.convK(y)
-        M = self.softmax1(torch.matmul(Q,K.t()))
-        Z = torch.mm(M,V)
+        K = torch.flatten(K,2,3)
+        M = torch.matmul(Q.permute(0,2,1),K)
+        M = torch.unsqueeze(M,1)
+        M = self.softmax2d(M)
+        M = torch.squeeze(M)
+        Z = torch.matmul(V,M) 
+        Z = torch.reshape(Z,(32,128,14,14))
         Z = self.convZ(Z)
         Z = self.bn(Z)
         out = residual + Z
@@ -87,7 +125,7 @@ class cmaBlock(nn.Module):
 
 class doubleResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000,fl_num_classes=61,noBN=False,channels=10):
+    def __init__(self, block, flowblock, layers, num_classes=1000,fl_num_classes=61,noBN=False,channels=10):
         self.inplanes = 64
         self.inplanes_flow = 64
         self.noBN = noBN
@@ -111,11 +149,11 @@ class doubleResNet(nn.Module):
         self.cm_fl_bn1 = nn.BatchNorm2d(64)
         self.cm_fl_relu = nn.ReLU(inplace=True)
         self.cm_fl_maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.cm_fl_layer1 = self._make_layer_flow(block, 64, layers[0])
-        self.cm_fl_layer2 = self._make_layer_flow(block, 128, layers[1], stride=2)
-        self.cm_fl_layer3 = self._make_layer_flow(block, 256, layers[2], stride=2)
+        self.cm_fl_layer1 = self._make_layer_flow(flowblock, 64, layers[0])
+        self.cm_fl_layer2 = self._make_layer_flow(flowblock, 128, layers[1], stride=2)
+        self.cm_fl_layer3 = self._make_layer_flow(flowblock, 256, layers[2], stride=2)
         self.cm_fl_cma1= cmaBlock(256, stride=1)
-        self.cm_fl_layer4 = self._make_layer_flow(block, 512, layers[3], stride=2)
+        self.cm_fl_layer4 = self._make_layer_flow(flowblock, 512, layers[3], stride=2)
         self.cm_fl_avgpool = nn.AvgPool2d(7)
         self.dp = nn.Dropout(p=0.5)
         self.cm_fl_fc = nn.Linear(512 * block.expansion, fl_num_classes)
@@ -245,7 +283,7 @@ def crossModresnet34(flow_model_dict_PATH, rgb_model_dict_PATH, pretrained=False
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = doubleResNet(BasicBlock, [3, 4, 6, 3], noBN=noBN, **kwargs)
+    model = doubleResNet(BasicBlock, BasicBlockFlow, [3, 4, 6, 3], noBN=noBN, **kwargs)
     if pretrained:
         model.load_state_dict(torch.load(rgb_model_dict_PATH), strict=False)
         model.load_state_dict(torch.load(flow_model_dict_PATH), strict=False)
