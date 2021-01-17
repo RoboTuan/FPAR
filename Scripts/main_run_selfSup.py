@@ -34,12 +34,18 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     #print(regression)
 
     if regression==True:
-        model_folder = os.path.join('./', out_dir, dataset, 'regSelfSup', 'stage'+str(stage))  # Dir for saving models and log files
+        if Flow is True:
+            model_folder = os.path.join('./', out_dir, dataset, 'regSelfSup_flow', 'stage'+str(stage))  # Dir for saving models and log files
+        else:
+            model_folder = os.path.join('./', out_dir, dataset, 'regSelfSup', 'stage'+str(stage))  # Dir for saving models and log files
     else:
         # DO this if no attention
         # TODO:
         # check if it's correct
-        model_folder = os.path.join('./', out_dir, dataset, 'selfSup', 'stage'+str(stage))  # Dir for saving models and log files
+        if Flow is True:
+            model_folder = os.path.join('./', out_dir, dataset, 'selfSup_flow', 'stage'+str(stage))  # Dir for saving models and log files
+        else:
+            model_folder = os.path.join('./', out_dir, dataset, 'selfSup', 'stage'+str(stage))  # Dir for saving models and log files
 
     
     # Create the dir
