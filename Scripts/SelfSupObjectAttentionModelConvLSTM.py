@@ -22,7 +22,7 @@ class Flatten(nn.Module):
 
 
 class SelfSupAttentionModel(nn.Module):
-    def __init__(self, num_classes=61, mem_size=512, REGRESSOR=False):
+    def __init__(self, num_classes=61, mem_size=512, REGRESSOR=False, Flow=False):
         super(SelfSupAttentionModel, self).__init__()
         self.num_classes = num_classes
         self.resNet = resnetMod.resnet34(True, True)
@@ -36,6 +36,9 @@ class SelfSupAttentionModel(nn.Module):
 
         # Adding flag for the regression option
         self.REGR = REGRESSOR
+        print("Regression: ", self.REGR)
+        self.FLOW = Flow
+        print("FLow: ", self.FLOW)
 
         #Secondary, self-supervised, task branch
         #Relu+conv+flatten+fullyconnected to get a 2*7*7 = 96 length 
@@ -45,10 +48,16 @@ class SelfSupAttentionModel(nn.Module):
         self.mmapPredictor.add_module('flatten',Flatten())
         
         # Different dimensions for the standard selfSup and regSelfSul tasks
-        if self.REGR == True:
-            self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,7*7))
+        if self.FLOW is True:
+            if self.REGR == True:
+                self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,14*7))
+            else:
+                self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*14*7))
         else:
-            self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*7*7))
+            if self.REGR == True:
+                self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,7*7))
+            else:
+                self.mmapPredictor.add_module('fc_2',nn.Linear(100*7*7,2*7*7))
 
 
 

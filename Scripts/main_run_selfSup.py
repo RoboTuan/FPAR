@@ -5,7 +5,7 @@ from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterC
                                 RandomHorizontalFlip)
 from torch.utils.tensorboard import SummaryWriter
 from ML_DL_Project.Scripts.resnetMod import *
-#from ML_DL_Project.Scripts.makeDatasetRGB import *
+from ML_DL_Project.Scripts.makeDatasetTwoStream import *
 from ML_DL_Project.Scripts.makeMmaps import *
 # Prende il makeDataset dell'ultimo script importato
 import argparse
@@ -13,7 +13,7 @@ import sys
 
 
 def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, weightDecay, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict):
+             valBatchSize, numEpochs, lr1, decayRate, weightDecay, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict, Flow):
 
     if dataset == 'gtea61':
         num_classes = 61
@@ -57,7 +57,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
     val_log_loss = open((model_folder + '/val_log_loss.txt'), 'w')
     val_log_acc = open((model_folder + '/val_log_acc.txt'), 'w')
 
-
+# IMPORTANT: IF FLOW IS TRUE, DROP LAST BATCH FROM BOTH DATA LOADERS
     # Data loader
     normalize = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     spatial_transform = Compose([Scale(256),
@@ -65,28 +65,45 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                                 MultiScaleCornerCrop([1, 0.875, 0.75, 0.65625], 224),
                                 ToTensor(), 
                                 normalize])
+    if Flow is True:
+        vid_seq_train = makeDataset2Stream(train_data_dir, spatial_transform=spatial_transform, stackSize=stackSize, seqLen=seqLen, fmt='.png', selfSup=True)
 
-    vid_seq_train = makeDataset(train_data_dir, spatial_transform=spatial_transform, stackSize=stackSize, seqLen=seqLen, fmt='.png')
+        train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize, shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
 
-    train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize, shuffle=True, num_workers=4, pin_memory=True)
+        if val_data_dir is not None:
+            vid_seq_val = makeDataset2Stream(val_data_dir, spatial_transform = Compose([Scale(256),
+                                                                                CenterCrop(224),
+                                                                                ToTensor(),
+                                                                                normalize]),
+                                        seqLen=seqLen, stackSize=stackSize, fmt='.png', selfSup=True)
 
-    if val_data_dir is not None:
-        vid_seq_val = makeDataset(val_data_dir, spatial_transform = Compose([Scale(256),
-                                                                            CenterCrop(224),
-                                                                            ToTensor(),
-                                                                            normalize]),
-                                    seqLen=seqLen, stackSize=stackSize, fmt='.png')
+        val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True, drop_last=True)
+        valInstances = vid_seq_val.__len__()
 
-    val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
-    valInstances = vid_seq_val.__len__()
+        trainInstances = vid_seq_train.__len__()
+    
+    else:
+        vid_seq_train = makeDataset(train_data_dir, spatial_transform=spatial_transform, stackSize=stackSize, seqLen=seqLen, fmt='.png')
 
-    trainInstances = vid_seq_train.__len__()
+        train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize, shuffle=True, num_workers=4, pin_memory=True)
+
+        if val_data_dir is not None:
+            vid_seq_val = makeDataset(val_data_dir, spatial_transform = Compose([Scale(256),
+                                                                                CenterCrop(224),
+                                                                                ToTensor(),
+                                                                                normalize]),
+                                        seqLen=seqLen, stackSize=stackSize, fmt='.png')
+
+        val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize, shuffle=False, num_workers=2, pin_memory=True)
+        valInstances = vid_seq_val.__len__()
+
+        trainInstances = vid_seq_train.__len__()
 
 
     train_params = []
     if stage == 1:
         
-        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
+        model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression, Flow=Flow)
         model.train(False)
         for params in model.parameters():
             params.requires_grad = False
@@ -98,7 +115,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             modelRgbStage1 = attentionModel(num_classes=num_classes, mem_size=memSize)
             modelRgbStage1.load_state_dict(torch.load(rgbStage1Dict))
 
-            model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
+            model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression, Flow=Flow)
             
             model.classifier = modelRgbStage1.classifier
             model.lstm_cell = modelRgbStage1.lstm_cell
@@ -106,7 +123,7 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
         else:
             # Pretrain with stage1 from self supervised
-            model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression)
+            model = SelfSupAttentionModel(num_classes=num_classes, mem_size=memSize, REGRESSOR=regression, FLow=Flow)
             model.load_state_dict(torch.load(stage1_dict))
 
 
@@ -213,6 +230,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
             iterPerEpoch += 1
             optimizer_fn.zero_grad()
             # Add  inpuMmap to device
+            if Flow is True:
+                inputMmap = torch.reshape(inputMmap, (32, 14, 1, 7, 7))
             inputMmap = inputMmap.to(DEVICE)
 
             inputVariable = Variable(inputs.permute(1, 0, 2, 3, 4).to(DEVICE))
@@ -282,6 +301,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                         #labelVariable = Variable(targets.cuda(async=True), volatile=True)
                         inputVariable = inputs.permute(1, 0, 2, 3, 4).to(DEVICE)
                         labelVariable = targets.to(DEVICE)
+                        if Flow is True:
+                            inputMmap = torch.reshape(inputMmap, (64, 14, 1, 7, 7))
                         inputMmap = inputMmap.to(DEVICE)
                         output_label, _ , mmapPrediction = model(inputVariable)
 
@@ -371,6 +392,7 @@ def __main__(argv=None):
     parser.add_argument('--regression', type=bool, default=False, help='Do the motion segmentation task (selfSup) with regression')
     parser.add_argument('--pretrainedRgbStage1', type=bool, default=False, help='Option to load the weights of the first stage of the rbg with attention')
     parser.add_argument('--rgbStage1Dict', type=str, default='./experiments/gtea61/selfSup/stage1/best_model_state_dict.pth', help='If pretrainedRgbStage1 is True, load this dictionary of the model of the rbg with attention')
+    parser.add_argument('--Flow', type=bool, default=False, help='Option to make the self sup task with warp flow instead of IDT')
 
 
     #args = parser.parse_args()
@@ -400,6 +422,7 @@ def __main__(argv=None):
     regression = args.regression
     pretrainedRgbStage1 = args.pretrainedRgbStage1
     rgbStage1Dict = args.rgbStage1Dict
+    Flow = args.Flow
     
     main_run(dataset, stage, trainDatasetDir, valDatasetDir, stage1Dict, outDir, seqLen, trainBatchSize,
-             valBatchSize, numEpochs, lr1, decayRate, weightDecay, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict)
+             valBatchSize, numEpochs, lr1, decayRate, weightDecay, stackSize, stepSize, memSize, alpha, regression, pretrainedRgbStage1, rgbStage1Dict, Flow)

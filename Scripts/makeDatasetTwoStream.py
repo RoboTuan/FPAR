@@ -7,6 +7,15 @@ import random
 import glob
 import sys
 
+from ML_DL_Project.Scripts.spatial_transforms import (Compose, ToTensor, CenterCrop, Scale, Normalize, MultiScaleCornerCrop,
+                                RandomHorizontalFlip)
+
+
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
+normalize = Normalize(mean=mean, std=std)
+spatial_transform2 = Compose([Scale((7,7)), ToTensor()]) 
+
 
 def gen_split(root_dir, stackSize):
     DatasetX = []
@@ -42,7 +51,7 @@ def gen_split(root_dir, stackSize):
 
 class makeDataset2Stream(Dataset):
     def __init__(self, root_dir, spatial_transform=None, sequence=False, stackSize=5,
-                 train=True, numSeg=5, fmt='.png', phase='train', seqLen = 25):
+                 train=True, numSeg=5, fmt='.png', phase='train', seqLen = 25, selfSup=False):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -60,6 +69,7 @@ class makeDataset2Stream(Dataset):
         self.fmt = fmt
         self.phase = phase
         self.seqLen = seqLen
+        self.selfSup = selfSup
 
     def __len__(self):
         return len(self.imagesX)
@@ -83,11 +93,17 @@ class makeDataset2Stream(Dataset):
                     i = k + int(startFrame)
                     fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + '.png'
                     img = Image.open(fl_name)
-                    inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True))
+                    if self.selfSup is True:
+                        inpSeq.append(spatial_transform2(img.convert('L')))
+                    else:
+                        inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True))
                     # fl_names.append(fl_name)
                     fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + '.png'
                     img = Image.open(fl_name)
-                    inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
+                    if self.selfSup is True:
+                        inpSeq.append(spatial_transform2(img.convert('L')))
+                    else:
+                        inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
                 inpSeqSegs.append(torch.stack(inpSeq, 0).squeeze())
             inpSeqSegs = torch.stack(inpSeqSegs, 0)
         else:
@@ -103,11 +119,17 @@ class makeDataset2Stream(Dataset):
                 i = k + int(startFrame)
                 fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + '.png'
                 img = Image.open(fl_name)
-                inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True))
+                if self.selfSup is True:
+                    inpSeq.append(spatial_transform2(img.convert('L')))
+                else:
+                    inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True)) 
                 # fl_names.append(fl_name)
                 fl_name = vid_nameY + '/flow_y_' + str(int(round(i))).zfill(5) + '.png'
                 img = Image.open(fl_name)
-                inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
+                if self.selfSup is True:
+                    inpSeq.append(spatial_transform2(img.convert('L')))
+                else:
+                    inpSeq.append(self.spatial_transform(img.convert('L'), inv=False, flow=True))
             inpSeqSegs = torch.stack(inpSeq, 0).squeeze(1)
         inpSeqF = []
         for i in np.linspace(1, numFrame, self.seqLen, endpoint=False):
@@ -115,6 +137,12 @@ class makeDataset2Stream(Dataset):
             img = Image.open(fl_name)
             inpSeqF.append(self.spatial_transform(img.convert('RGB')))
         inpSeqF = torch.stack(inpSeqF, 0)
-        return inpSeqSegs, inpSeqF, label#, vid_nameF#, fl_name
+        
+        if self.selfSup is True:
+            return inpSeqF, inpSeqSegs, label#, vid_nameF#, fl_name
+        else: 
+            return inpSeqSegs, inpSeqF, label#, vid_nameF#, fl_name
+
+    
     def __getLabel__(self):
         return self.action
