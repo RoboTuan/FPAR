@@ -273,7 +273,7 @@ class doubleResNet(nn.Module):
         y = self.cm_fl_fc(y)
 
         if self.noBN:
-            return x, conv_layer4BN, conv_layer4NBN ,y
+            return x, conv_layer4BN, conv_layer4NBN ,y1
         else:
             return x, conv_layer4BN, y1
 
