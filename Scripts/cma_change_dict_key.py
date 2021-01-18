@@ -7,7 +7,7 @@ def change_key_names(flow_model_path,frame_model_path,out_path_flow,out_path_fra
     flowModel = flow_resnet34(False, channels=10, num_classes=61)
     flowModel.load_state_dict(torch.load(flow_model_path),strict = False)
     flowModelB = flow_resnet34(False, channels=10, num_classes=61)
-    flowModel.load_state_dict(torch.load(flow_model_path),strict = False)
+    flowModelB.load_state_dict(torch.load(flow_model_path),strict = False)
 
     state_dict = flowModel.state_dict()
     state_dict_v2 = copy.deepcopy(state_dict)
@@ -21,10 +21,10 @@ def change_key_names(flow_model_path,frame_model_path,out_path_flow,out_path_fra
     
     
 
-    frameModel = resnet34(True, True)
-
-    frameModelB = resnet34(True,True)
-    
+    frameModel = resnet34(False, True)
+    frameModel.load_state_dict(torch.load(frame_model_path),strict = False)
+    frameModelB = resnet34(False,True)
+    frameModelB.load_state_dict(torch.load(frame_model_path),strict = False)
 
     state_dict = frameModel.state_dict()
     state_dict_v2 = copy.deepcopy(state_dict)
