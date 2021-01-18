@@ -64,7 +64,7 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
 
         vid_seq_val = makeDataset2Stream(valDatasetDir,
                                     spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
-                                    sequence=False, numSeg=1, stackSize=stackSize, fmt='.png', phase='Test',
+                                    sequence=True, numSeg=1, stackSize=stackSize, fmt='.png', phase='Test',
                                     seqLen=seqLen)
 
         val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize,
