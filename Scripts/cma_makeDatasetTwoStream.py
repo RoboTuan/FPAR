@@ -76,11 +76,8 @@ class makeDataset2Stream(Dataset):
             if numFrame <= self.stackSize:
                 frameStart = np.ones(self.numSeg)
             else:
-                frameStart = np.linspace(1, numFrame - self.stackSize, self.numSeg)
-            if self.phase == 'train':
-                    startFrame = random.randint(1, numFrame - self.stackSize)
-            else:
-                    startFrame = startFrame = np.ceil((numFrame - self.stackSize)/2)
+                frameStart = np.linspace(1, numFrame - self.stackSize, self.stackSize)
+
             for j in range(self.seqLen):
                 inpSeq = []
                 for k in range(self.stackSize):
@@ -102,7 +99,6 @@ class makeDataset2Stream(Dataset):
                     startFrame = random.randint(1, numFrame - self.stackSize)
                 else:
                     startFrame = np.ceil((numFrame - self.stackSize)/2)
-            time_flow_seq=[]
             inpSeq = []
             for k in range(self.stackSize):
                 i = k + int(startFrame)
