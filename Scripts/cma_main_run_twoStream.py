@@ -58,7 +58,7 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
                                 sequence=True, numSeg=1, stackSize=stackSize, fmt='.png', seqLen=seqLen)
 
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
-                            shuffle=True, num_workers=4, pin_memory=True)
+                            shuffle=True, num_workers=4, pin_memory=True, drop_last=True)
 
     if valDatasetDir is not None:
 
@@ -68,7 +68,7 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
                                     seqLen=seqLen)
 
         val_loader = torch.utils.data.DataLoader(vid_seq_val, batch_size=valBatchSize,
-                                shuffle=False, num_workers=2, pin_memory=True)
+                                shuffle=False, num_workers=2, pin_memory=True, drop_last=True)
         valSamples = vid_seq_val.__len__()
 
         
