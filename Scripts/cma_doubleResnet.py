@@ -166,14 +166,16 @@ class doubleResNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-            elif isinstance(m, cmaBlock): 
-              for mm in m.modules():
-                if isinstance(mm, nn.BatchNorm2d):
-                  mm.weight.data.fill_(0)
-                  mm.bias.data.zero_()
-        #initialize weight of cma_batchnorm as 0:
             
-            #trovare nome
+        #initialize weight of cma_batchnorm as 0:
+        for m in self.modules(): ##initialize weights and bias of batch norm of cma blocs to 0
+            if isinstance(m, cmaBlock):
+              for mm in m.modules():
+                if isinstance(mm, nn.BatchNorm2d):                 
+                  with torch.no_grad():
+                    mm.weight.zero_()
+                    mm.bias.zero_()
+   
 
     def _make_layer(self, block, planes, blocks, stride=1, noBN=False):
         downsample = None
