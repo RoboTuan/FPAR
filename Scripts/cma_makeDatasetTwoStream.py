@@ -74,10 +74,10 @@ class makeDataset2Stream(Dataset):
         self.spatial_transform.randomize_parameters()
         if self.sequence is True:
             if numFrame <= self.stackSize:
-                frameStart = np.ones(self.numSeg)
+                frameStart = np.ones(self.seqLen)
             else:
                 frameStart = np.linspace(1, numFrame - self.stackSize, self.seqLen)
-
+            print(len(frameStart))
             for j in range(self.seqLen):
                 inpSeq = []
                 for k in range(self.stackSize):
