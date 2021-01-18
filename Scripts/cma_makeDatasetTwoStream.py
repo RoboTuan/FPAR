@@ -76,12 +76,12 @@ class makeDataset2Stream(Dataset):
             if numFrame <= self.stackSize:
                 frameStart = np.ones(self.numSeg)
             else:
-                frameStart = np.linspace(1, numFrame - self.stackSize, self.stackSize)
+                frameStart = np.linspace(1, numFrame - self.stackSize, self.seqLen)
 
             for j in range(self.seqLen):
                 inpSeq = []
                 for k in range(self.stackSize):
-                    i = k + int(startFrame)
+                    i = k + int(frameStart[j])
                     fl_name = vid_nameX + '/flow_x_' + str(int(round(i))).zfill(5) + '.png'
                     img = Image.open(fl_name)
                     inpSeq.append(self.spatial_transform(img.convert('L'), inv=True, flow=True))
