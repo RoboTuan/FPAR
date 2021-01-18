@@ -264,5 +264,3 @@ def __main__(argv=None):
     decayRate = args.decayRate
     memSize = args.memSize
 
-    main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
-             trainBatchSize, valBatchSize, lr1, numEpochs, stepSize, decayRate)
