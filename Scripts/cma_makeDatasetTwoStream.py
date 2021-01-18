@@ -77,7 +77,6 @@ class makeDataset2Stream(Dataset):
                 frameStart = np.ones(self.seqLen)
             else:
                 frameStart = np.linspace(1, numFrame - self.stackSize, self.seqLen)
-            print(len(frameStart))
             for j in range(self.seqLen):
                 inpSeq = []
                 for k in range(self.stackSize):
