@@ -169,8 +169,9 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
             epoch_loss += loss.item()
         avg_loss = epoch_loss / iterPerEpoch
         trainAccuracy = torch.true_divide(numCorrTrain, trainSamples) * 100
-        print('Average training loss after {} epoch = {} '.format(epoch + 1, avg_loss))
-        print('Training accuracy after {} epoch = {}% '.format(epoch + 1, trainAccuracy))
+        #print('Average training loss after {} epoch = {} '.format(epoch + 1, avg_loss))
+        #print('Training accuracy after {} epoch = {}% '.format(epoch + 1, trainAccuracy))
+        print('[{}/{}] [Train | Loss={:.3f} | Acc={:.3f}]'.format(epoch + 1,numEpochs, avg_loss,trainAccuracy))
         writer.add_scalar('train/epoch_loss', avg_loss, epoch + 1)
         writer.add_scalar('train/accuracy', trainAccuracy, epoch + 1)
         train_log_loss.write('Training loss after {} epoch = {}\n'.format(epoch + 1, avg_loss))
@@ -198,8 +199,9 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
                         numCorr += (predicted == labelVariable.data).sum()
                 val_accuracy = torch.true_divide(numCorr, valSamples) * 100
                 avg_val_loss = val_loss_epoch / val_iter
-                print('Val Loss after {} epochs, loss = {}'.format(epoch + 1, avg_val_loss))
-                print('Val Accuracy after {} epochs = {}%'.format(epoch + 1, val_accuracy))
+                #print('Val Loss after {} epochs, loss = {}'.format(epoch + 1, avg_val_loss))
+                #print('Val Accuracy after {} epochs = {}%'.format(epoch + 1, val_accuracy))
+                print('[{}/{}] [Valid | Loss={:.3f} | Acc={:.3f}]'.format(epoch + 1,numEpochs, avg_val_loss,val_accuracy))
                 writer.add_scalar('val/epoch_loss', avg_val_loss, epoch + 1)
                 writer.add_scalar('val/accuracy', val_accuracy, epoch + 1)
                 val_log_loss.write('Val Loss after {} epochs = {}\n'.format(epoch + 1, avg_val_loss))
