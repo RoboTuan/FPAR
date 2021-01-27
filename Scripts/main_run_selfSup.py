@@ -260,8 +260,8 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
 
             # IMPORTANTE LEVARE QUESTA PARTE
             import matplotlib.pyplot as plt
-            print(map_predictions.shape)
-            idt = map_predictions[0]
+            print(mmapPrediction.shape)
+            idt = mmapPrediction[0]
             idt = torch.reshape(idt, (7,7))
             print(idt.shape)
             print(inputMmap[0].shape)
