@@ -101,6 +101,7 @@ class SelfSupAttentionModel(nn.Module):
             state = self.lstm_cell(attentionFeat, state)
         
         # IMPORTANTE LEVARE QUESTA PARTE
+        import matplotlib.pyplot as plt
         print(map_predictions.shape)
         idt = map_predictions[0]
         idt = torch.reshape(idt, (7,7))
