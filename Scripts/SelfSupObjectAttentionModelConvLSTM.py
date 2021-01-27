@@ -107,7 +107,7 @@ class SelfSupAttentionModel(nn.Module):
         idt = torch.reshape(idt, (7,7))
         print(idt.shape)
         fig = plt.figure()
-        plt.imshow(idt.cpu().numpy())
+        plt.imshow(idt.cpu().detach().numpy())
         sys.exit()
         # FINE IMPORTANTE
 
