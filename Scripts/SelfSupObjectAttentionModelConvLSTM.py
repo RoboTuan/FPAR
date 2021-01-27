@@ -99,17 +99,6 @@ class SelfSupAttentionModel(nn.Module):
               map_predictions = torch.cat([map_predictions,prediction],dim=0)
 
             state = self.lstm_cell(attentionFeat, state)
-        
-        # IMPORTANTE LEVARE QUESTA PARTE
-        import matplotlib.pyplot as plt
-        print(map_predictions.shape)
-        idt = map_predictions[0]
-        idt = torch.reshape(idt, (7,7))
-        print(idt.shape)
-        fig = plt.figure()
-        plt.imshow(idt.cpu().detach().numpy(), cmap="gray")
-        sys.exit()
-        # FINE IMPORTANTE
 
         feats1 = self.avgpool(state[1]).view(state[1].size(0), -1)
         feats = self.classifier(feats1)
