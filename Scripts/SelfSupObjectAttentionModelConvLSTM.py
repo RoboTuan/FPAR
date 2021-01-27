@@ -103,13 +103,5 @@ class SelfSupAttentionModel(nn.Module):
         feats1 = self.avgpool(state[1]).view(state[1].size(0), -1)
         feats = self.classifier(feats1)
         # In the end return the feature maps of the conv lstm cell and
-        # the motionmap predictions obtained by the selfsupervised task
-
-        # IMPORTANTE LEVARE QUESTA PARTE
-        import matplotlib.pyplot as plt
-        print(map_predictions.shape)
-        idt = map_predictions[0]
-        print(idt.shape)
-        sys.exit()
-        # FINE IMPORTANTE
+        # the motionmap predictions obtained by the selfsupervised task 
         return feats, feats1, map_predictions

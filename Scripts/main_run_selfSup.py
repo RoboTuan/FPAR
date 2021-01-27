@@ -257,6 +257,18 @@ def main_run(dataset, stage, train_data_dir, val_data_dir, stage1_dict, out_dir,
                 inputMmap = inputMmap = torch.reshape(inputMmap, (-1,))
                 inputMmap = torch.round(inputMmap).long()  #making things black and white again
 
+
+            # IMPORTANTE LEVARE QUESTA PARTE
+            import matplotlib.pyplot as plt
+            print(map_predictions.shape)
+            idt = map_predictions[0]
+            idt = torch.reshape(idt, (7,7))
+            print(idt.shape)
+            print(inputMmap[0].shape)
+            sys.exit()
+            # FINE IMPORTANTE
+
+
             # Weighting the loss of the seflSup task by multiplying it by alpha
             loss2 = alpha*lossMS(mmapPrediction,inputMmap)
             loss = loss_fn(output_label, labelVariable)
