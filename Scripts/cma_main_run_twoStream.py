@@ -284,8 +284,6 @@ def __main__(argv=None):
     args, _ = parser.parse_known_args(argv)
 
     dataset = args.dataset
-    flowModel = args.flowModel
-    rgbModel = args.rgbModel
     trainDatasetDir = args.trainDatasetDir
     valDatasetDir = args.valDatasetDir
     outDir = args.outDir
