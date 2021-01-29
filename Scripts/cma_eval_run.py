@@ -32,7 +32,7 @@ def main_run(dataset, model_state_dict, dataset_dir, stackSize, seqLen, memSize)
     testBatchSize = 1
     spatial_transform = Compose([Scale(256), CenterCrop(224), ToTensor(), normalize])
 
-    vid_seq_test = makeDataset2Stream(dataset_dir,spatial_transform=spatial_transform,
+    vid_seq_test = cma_makeDataset2Stream(dataset_dir,spatial_transform=spatial_transform,
                                 sequence=True, numSeg=1, stackSize=stackSize, fmt='.png', seqLen=seqLen,phase='Test')
 
     test_loader = torch.utils.data.DataLoader(vid_seq_test, batch_size=testBatchSize,
