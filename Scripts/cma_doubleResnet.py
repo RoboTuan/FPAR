@@ -282,7 +282,7 @@ class doubleResNet(nn.Module):
         else:
             return x, conv_layer4BN, y1
 
-def crossModresnet34(flow_model_dict_PATH, rgb_model_dict_PATH, pretrained=False, noBN=False, **kwargs):
+def crossModresnet34(pretrained=False, noBN=False, **kwargs):
 
     model = doubleResNet(BasicBlock, BasicBlockFlow, [3, 4, 6, 3], noBN=noBN, **kwargs)
     if pretrained == True:
