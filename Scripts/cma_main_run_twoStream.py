@@ -298,5 +298,5 @@ def __main__(argv=None):
     memSize = args.memSize
     flowModelDict = args.flowModelDict
     rgbModelDict = args.rgbModelDict
-    main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
+    main_run(dataset, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
              trainBatchSize, valBatchSize, lr1, numEpochs, decayRate, stepSize, flowModelDict,rgbModelDict )
