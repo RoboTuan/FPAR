@@ -263,10 +263,7 @@ def main_run(dataset, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir
 def __main__(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='gtea61', help='Dataset')
-    parser.add_argument('--flowModel', type=str, default='./experiments/gtea61/flow/best_model_state_dict.pth',
-                        help='Flow model')
-    parser.add_argument('--rgbModel', type=str, default='./experiments/gtea61/rgb/best_model_state_dict.pth',
-                        help='RGB model')
+
     parser.add_argument('--trainDatasetDir', type=str, default='./dataset/gtea_warped_flow_61/split2/train',
                         help='Train set directory')
     parser.add_argument('--valDatasetDir', type=str, default=None,
