@@ -53,7 +53,7 @@ def main_run(dataset, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir
     spatial_transform = Compose([Scale(256), RandomHorizontalFlip(), MultiScaleCornerCrop([1, 0.875, 0.75, 0.65625], 224),
                                 ToTensor(), normalize])
 
-    vid_seq_train = makeDataset2Stream(trainDatasetDir,spatial_transform=spatial_transform,
+    vid_seq_train = cma_makeDataset2Stream(trainDatasetDir,spatial_transform=spatial_transform,
                                 sequence=True, numSeg=1, stackSize=stackSize, fmt='.png', seqLen=seqLen)
 
     train_loader = torch.utils.data.DataLoader(vid_seq_train, batch_size=trainBatchSize,
@@ -61,7 +61,7 @@ def main_run(dataset, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir
 
     if valDatasetDir is not None:
 
-        vid_seq_val = makeDataset2Stream(valDatasetDir,
+        vid_seq_val = cma_makeDataset2Stream(valDatasetDir,
                                     spatial_transform=Compose([Scale(256), CenterCrop(224), ToTensor(), normalize]),
                                     sequence=True, numSeg=1, stackSize=stackSize, fmt='.png', phase='Test',
                                     seqLen=seqLen)
