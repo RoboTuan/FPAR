@@ -40,7 +40,7 @@ def gen_split(root_dir, stackSize):
     return DatasetX, DatasetY, DatasetF, Labels, NumFrames, action
 
 
-class makeDataset2Stream(Dataset):
+class cma_makeDataset2Stream(Dataset):
     def __init__(self, root_dir, spatial_transform=None, sequence=False, stackSize=5,
                  train=True, numSeg=5, fmt='.png', phase='train', seqLen = 25):
         """
