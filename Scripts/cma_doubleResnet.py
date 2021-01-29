@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import math
 import torch.utils.model_zoo as model_zoo
-
+import copy
 
 #__all__ = ['crossModresnet34']
 
@@ -115,8 +115,11 @@ class cmaBlock(nn.Module):
         M = torch.unsqueeze(M,1)
         M = self.softmax2d(M)
         M = torch.squeeze(M)
+        #print(f'M{M.size()},V{V.size()}')
         Z = torch.matmul(V,M) 
+        #print(f'Z{Z.size()}')
         Z = torch.reshape(Z,(-1,128,14,14))
+        #print(f'Z{Z.size()}')
         Z = self.convZ(Z)
         Z = self.bn(Z)
         out = residual + Z
@@ -166,8 +169,7 @@ class doubleResNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-            
-        #initialize weight of cma_batchnorm as 0:
+
         for m in self.modules(): ##initialize weights and bias of batch norm of cma blocs to 0
             if isinstance(m, cmaBlock):
               for mm in m.modules():
@@ -175,7 +177,8 @@ class doubleResNet(nn.Module):
                   with torch.no_grad():
                     mm.weight.zero_()
                     mm.bias.zero_()
-   
+
+
 
     def _make_layer(self, block, planes, blocks, stride=1, noBN=False):
         downsample = None
@@ -279,16 +282,32 @@ class doubleResNet(nn.Module):
         else:
             return x, conv_layer4BN, y1
 
-def crossModresnet34(pretrained=False, noBN=False, **kwargs):
-    """Constructs a ResNet-34 model.
+def crossModresnet34(flow_model_dict_PATH, rgb_model_dict_PATH, pretrained=False, noBN=False, **kwargs):
 
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-    """
     model = doubleResNet(BasicBlock, BasicBlockFlow, [3, 4, 6, 3], noBN=noBN, **kwargs)
-    if pretrained:
-        model.load_state_dict(torch.load(rgb_model_dict_PATH), strict=False)
-        model.load_state_dict(torch.load(flow_model_dict_PATH), strict=False)
+    if pretrained == True:
+        resPretrained=model_zoo.load_url(model_urls['resnet34'])
+
+        cma_dict = copy.deepcopy(resPretrained)
+
+        for key in resPretrained:
+            cma_dict['cm_rgb_' + key] = cma_dict.pop(key)
+
+
+
+        for key,value in resPretrained.items():
+            if (key != "fc.weight" and key!="fc.bias"):
+                if(key == "conv1.weight"):
+                    rgb_weight = value
+                    rgb_weight_mean = torch.mean(rgb_weight, dim=1)
+                    flow_weight = rgb_weight_mean.unsqueeze(1).repeat(1, 10, 1, 1)
+                    cma_dict['cm_fl_' + key] = flow_weight
+
+                else:
+                    cma_dict['cm_fl_'+key] = resPretrained[key]
+
+        model.load_state_dict(cma_dict,strict=False)
+
     return model
 
 def change_key_names(old_params, in_channels):
