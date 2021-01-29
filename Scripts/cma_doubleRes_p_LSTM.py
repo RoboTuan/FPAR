@@ -80,6 +80,6 @@ class doubleresnet_lstm_Model(nn.Module):
         flow_feats = torch.stack(flow_features_maps,0)
         flow_feats = flow_feats.permute(1,0,2)
         flow_feats = self.avgpool_flow(flow_feats)
-        flow_feats = flow_feats.squeeze()
+        flow_feats = flow_feats.squeeze(dim=1)
         feats = self.classifier(feats1)
         return feats, feats1, flow_feats

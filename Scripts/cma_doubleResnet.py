@@ -116,7 +116,7 @@ class cmaBlock(nn.Module):
         M = self.softmax2d(M)
         M = torch.squeeze(M)
         Z = torch.matmul(V,M) 
-        Z = torch.reshape(Z,(32,128,14,14))
+        Z = torch.reshape(Z,(-1,128,14,14))
         Z = self.convZ(Z)
         Z = self.bn(Z)
         out = residual + Z
