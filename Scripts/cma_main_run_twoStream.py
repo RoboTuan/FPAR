@@ -12,7 +12,7 @@ import argparse
 import sys
 
 
-def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
+def main_run(dataset, stackSize, seqLen, memSize, trainDatasetDir, valDatasetDir, outDir,
              trainBatchSize, valBatchSize, lr1, numEpochs, decayRate, stepSize,flowModelDict,rgbModelDict):
 
     if dataset == 'gtea61':
