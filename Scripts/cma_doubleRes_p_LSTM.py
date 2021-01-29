@@ -18,11 +18,11 @@ class doubleresnet_lstm_Model(nn.Module):
         In this script are initialized the ResNet34 model, the convLSTM and the 
         CAM and attentionMAP computations. See comments for each part. 
     """
-    def __init__(self, num_classes=61, mem_size=512, seqLen=7, flowModel='', rgbModel=''):
+    def __init__(self, num_classes=61, mem_size=512, seqLen=7):
         super(doubleresnet_lstm_Model, self).__init__()
         self.num_classes = num_classes
         # Initialize the ResNet
-        self.resNet = crossModresnet34(flowModel, rgbModel, True, True)
+        self.resNet = crossModresnet34( True, True)
         self.mem_size = mem_size
         # Get the weighs of the last fc layer of the ResNet,
         # we need this to comput the CAM and the attentionMAP

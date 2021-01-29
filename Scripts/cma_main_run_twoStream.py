@@ -72,7 +72,7 @@ def main_run(dataset, flowModel, rgbModel, stackSize, seqLen, memSize, trainData
 
         
 
-    model = crossAttentionModel(flowModel=flowModel, frameModel=rgbModel, stackSize=stackSize, memSize=memSize,
+    model = crossAttentionModel(stackSize=stackSize, memSize=memSize,
                                         num_classes=num_classes)
     model.Model.resNet.load_state_dict(torch.load(flowModelDict),strict = False)
     model.Model.load_state_dict(torch.load(rgbModelDict),strict=False)
