@@ -27,7 +27,7 @@ In general, self-supervised learning is considered as a subset of unsupervised l
 
 ![SelfSupClassOpenChocolate](https://user-images.githubusercontent.com/57213004/110154051-14ce1e00-7de4-11eb-8490-5c19e547a450.gif)
 ![selfSupClassPourBread](https://user-images.githubusercontent.com/57213004/110154086-1dbeef80-7de4-11eb-893b-88894a9ce340.gif)
-\\
+
 ![RegSelfSupPourBread](https://user-images.githubusercontent.com/57213004/110153950-fec05d80-7de3-11eb-86ca-0af0043f1348.gif)
 ![RegSelfSupOpenChocolate](https://user-images.githubusercontent.com/57213004/110154021-0c75e300-7de4-11eb-92a6-079e954bfe7b.gif)
 
