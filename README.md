@@ -39,7 +39,7 @@ After a detailed analysis through the confusion matrices and the visualization o
 ![Lsta7FramesOpenChocolate](https://user-images.githubusercontent.com/57213004/110154966-2bc14000-7de5-11eb-8878-2c7480260403.gif)
 
 
-## Cross-Attention Modality
+## Cross-Modality Attention
 Until now spatial and temporal information are fused till the final layer of the network. We tried an approach, whose aim is to let RGB embed information of the flow branch and viceversa, before the generation of spatial attention maps. We selected the 4th layer of the ResNet to perform this. We maintain the two-stream architecture as *Ego-RNN* section.
 
 
