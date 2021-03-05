@@ -38,8 +38,7 @@ After a detailed analysis through the confusion matrices and the visualization o
 
 
 ## Cross-Attention Modality
-Until now spatial and temporal information are fused till the final layer of the network. We tried an approach, whose aim is to let RGB embed information of the flow branch and viceversa, before the generation of spatial attention maps. We selected the $4^{th}$ <img src="https://render.githubusercontent.com/render/math?math=4^{th}"> layer of the ResNet to perform this. We maintain the two-stream architecture as Ego-RNN section.
-<img src="https://latex.codecogs.com/gif.latex?4^{th}"/>
+Until now spatial and temporal information are fused till the final layer of the network. We tried an approach, whose aim is to let RGB embed information of the flow branch and viceversa, before the generation of spatial attention maps. We selected the 4th layer of the ResNet to perform this. We maintain the two-stream architecture as Ego-RNN section.
 
 
 
