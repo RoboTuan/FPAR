@@ -15,7 +15,7 @@ We want the network to discriminate among regions that are relevant to the actio
 
 ## Self-Supervised Task
 Now, our aim is to catch a method able to perform the action recognition on a single stream. This wish is realized thanks to an additional branch, called self-supervised branch, which employes a pretext motion segmentation task to interlace spatial and temporal features. 
-In general, self-supervised learning is considered as a subset of unsupervised learning 
+In general, self-supervised learning is considered as a subset of unsupervised learning in which the networks are trained with an auxiliary pretext task in which pseudo-labels are automatically generated based on some data attributes. As ground-truth labels we exploited the improved dense trajectories, briefly called IDT. The pretext task addresses firstly a classification problem and finally also a regression one. The difference between the two methods are then underlined and analyzed.
 
 ## Conv LSTA
 
