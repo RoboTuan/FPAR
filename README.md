@@ -10,3 +10,11 @@ Being able to recognize actions and activities from videos is one of the most ch
 We will perform this kind of recognition on the [GTEA61](http://cbs.ic.gatech.edu/fpv/) dataset using the [Ego-RNN](https://github.com/swathikirans/ego-rnn) as a staring point. Subsequently, we will move beyond this two-stream network and try other approaches with a self supervised auxiliary pretext motion segmentation task.
 
 ## Ego-RNN
+
+## Self-supervised task
+
+## Conv LSTA
+
+## Cross-attention modality
+
+## Warp flow based self-supervised task
