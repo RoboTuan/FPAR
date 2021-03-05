@@ -35,9 +35,16 @@ In general, self-supervised learning is considered as a subset of unsupervised l
 ## Conv LSTA
 After a detailed analysis through the confusion matrices and the visualization of the *CAMs*, we noticed that the models had some pattern in the wrong predictions. The architecture of the *LSTA* can improve the recognition of activities that regard include multiple objects. The *conv-LSTM* is extended with a recurrent attention and with an output pooling which has a high capacity output gate. In this way the attention mechanism is improved so that it can track previously activated regions.
 
+![Lsta7FramesPourBreadChocolate](https://user-images.githubusercontent.com/57213004/110154929-22d06e80-7de5-11eb-9249-b93b76bad01b.gif)
+![Lsta7FramesOpenChocolate](https://user-images.githubusercontent.com/57213004/110154966-2bc14000-7de5-11eb-8878-2c7480260403.gif)
+
+
 ## Cross-Attention Modality
 Until now spatial and temporal information are fused till the final layer of the network. We tried an approach, whose aim is to let RGB embed information of the flow branch and viceversa, before the generation of spatial attention maps. We selected the $4^{th}$ <img src="https://render.githubusercontent.com/render/math?math=4^{th}"> layer of the ResNet to perform this. We maintain the two-stream architecture as Ego-RNN section.
 
 ## Warp Flow based Self-Supervised Task
-At this point we still had some regularities in the errors of the networks, so we decided to try a different motion segmentation task for the model with the self supervised head. We exploited the warp flow and since the respective images are gray-scaled, the regression was the most suitable choice for the network implementation.
+
+![WarpFlowBasedOpenChocolate](https://user-images.githubusercontent.com/57213004/110155323-c02ba280-7de5-11eb-8f04-666e6899c350.gif)
+![WarpFlowBasedPourBreadChocolate](https://user-images.githubusercontent.com/57213004/110155365-cc176480-7de5-11eb-8fb7-471558217586.gif)
+
 
