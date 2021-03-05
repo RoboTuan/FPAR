@@ -11,10 +11,10 @@ We will perform this kind of recognition on the [GTEA61](http://cbs.ic.gatech.ed
 
 ## Ego-RNN
 
-## Self-supervised task
+## Self-Supervised Task
 
 ## Conv LSTA
 
-## Cross-attention modality
+## Cross-Attention Modality
 
-## Warp flow based self-supervised task
+## Warp Flow based Self-Supervised Task
