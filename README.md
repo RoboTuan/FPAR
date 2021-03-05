@@ -42,3 +42,8 @@ After a detailed analysis through the confusion matrices and the visualization o
 ## Cross-Attention Modality
 
 ## Warp Flow based Self-Supervised Task
+
+![WarpFlowBasedOpenChocolate](https://user-images.githubusercontent.com/57213004/110155323-c02ba280-7de5-11eb-8f04-666e6899c350.gif)
+![WarpFlowBasedPourBreadChocolate](https://user-images.githubusercontent.com/57213004/110155365-cc176480-7de5-11eb-8fb7-471558217586.gif)
+
+
