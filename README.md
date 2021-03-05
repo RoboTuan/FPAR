@@ -35,6 +35,10 @@ In general, self-supervised learning is considered as a subset of unsupervised l
 ## Conv LSTA
 After a detailed analysis through the confusion matrices and the visualization of the *CAMs*, we noticed that the models had some pattern in the wrong predictions. The architecture of the *LSTA* can improve the recognition of activities that regard include multiple objects. The *conv-LSTM* is extended with a recurrent attention and with an output pooling which has a high capacity output gate. In this way the attention mechanism is improved so that it can track previously activated regions.
 
+![Lsta7FramesPourBreadChocolate](https://user-images.githubusercontent.com/57213004/110154929-22d06e80-7de5-11eb-9249-b93b76bad01b.gif)
+![Lsta7FramesOpenChocolate](https://user-images.githubusercontent.com/57213004/110154966-2bc14000-7de5-11eb-8878-2c7480260403.gif)
+
+
 ## Cross-Attention Modality
 
 ## Warp Flow based Self-Supervised Task
