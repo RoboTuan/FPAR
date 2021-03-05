@@ -13,6 +13,11 @@ We will perform this kind of recognition on the [GTEA61](http://cbs.ic.gatech.ed
 This kind of networks has two different branches. The RGB branch consists in a *resnet34* and a *conv-LSTM*. The motion branch instead has only the *resnet34*. After a separate training, we fined tune both branches with a joint training.
 We want the network to discriminate among regions that are relevant to the action, so an attetion mechanism is build upon the class activation maps (*CAMs*) with the weights of the fully connected layer of the *resnet34* and the *conv-LSTM* of the RBG branch with those features.
 
+
+![twoStream7PourBread](https://user-images.githubusercontent.com/57213004/110153747-ba34c200-7de3-11eb-9ec2-a5597403abf1.gif)
+![twoStream7OpenChocolate](https://user-images.githubusercontent.com/57213004/110153770-c3259380-7de3-11eb-8aa5-e882a197d774.gif)
+
+
 ## Self-Supervised Task
 Now, our aim is to catch a method able to perform the action recognition on a single stream. This wish is realized thanks to an additional branch, called self-supervised branch, which employes a pretext motion segmentation task to interlace spatial and temporal features. 
 In general, self-supervised learning is considered as a subset of unsupervised learning in which the networks are trained with an auxiliary pretext task in which pseudo-labels are automatically generated based on some data attributes. As ground-truth labels we exploited the improved dense trajectories, briefly called IDT. The pretext task addresses firstly a classification problem and finally also a regression one. The difference between the two methods are then underlined and analyzed.
