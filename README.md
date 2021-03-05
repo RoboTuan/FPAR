@@ -14,9 +14,21 @@ This kind of networks has two different branches. The RGB branch consists in a *
 We want the network to discriminate among regions that are relevant to the action, so an attetion mechanism is build upon the class activation maps (*CAMs*) with the weights of the fully connected layer of the *resnet34* and the *conv-LSTM* of the RBG branch with those features.
 
 
+
+![twoStream7PourBread](https://user-images.githubusercontent.com/57213004/110153747-ba34c200-7de3-11eb-9ec2-a5597403abf1.gif)
+![twoStream7OpenChocolate](https://user-images.githubusercontent.com/57213004/110153770-c3259380-7de3-11eb-8aa5-e882a197d774.gif)
+
+
+
 ## Self-Supervised Task
 Now, our aim is to catch a method able to perform the action recognition on a single stream. This wish is realized thanks to an additional branch, called self-supervised branch, which employes a pretext motion segmentation task to interlace spatial and temporal features. 
 In general, self-supervised learning is considered as a subset of unsupervised learning in which the networks are trained with an auxiliary pretext task in which pseudo-labels are automatically generated based on some data attributes. As ground-truth labels we exploited the improved dense trajectories, briefly called IDT. The pretext task addresses firstly a classification problem and finally also a regression one. The difference between the two methods are then underlined and analyzed.
+
+
+![RegSelfSupPourBread](https://user-images.githubusercontent.com/57213004/110153950-fec05d80-7de3-11eb-86ca-0af0043f1348.gif)
+![RegSelfSupOpenChocolate](https://user-images.githubusercontent.com/57213004/110154021-0c75e300-7de4-11eb-92a6-079e954bfe7b.gif)
+![SelfSupClassOpenChocolate](https://user-images.githubusercontent.com/57213004/110154051-14ce1e00-7de4-11eb-8490-5c19e547a450.gif)
+![selfSupClassPourBread](https://user-images.githubusercontent.com/57213004/110154086-1dbeef80-7de4-11eb-893b-88894a9ce340.gif)
 
 ## Conv LSTA
 After a detailed analysis through the confusion matrices and the visualization of the *CAMs*, we noticed that the models had some pattern in the wrong predictions. The architecture of the *LSTA* can improve the recognition of activities that regard include multiple objects. The *conv-LSTM* is extended with a recurrent attention and with an output pooling which has a high capacity output gate. In this way the attention mechanism is improved so that it can track previously activated regions.
