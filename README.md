@@ -42,6 +42,8 @@ After a detailed analysis through the confusion matrices and the visualization o
 ## Cross-Modality Attention
 Until now spatial and temporal information are fused till the final layer of the network. We tried an approach, whose aim is to let RGB embed information of the flow branch and viceversa, before the generation of spatial attention maps. We selected the 4th layer of the ResNet to perform this. We maintain the two-stream architecture as *Ego-RNN* section.
 
+![CmaOpenChocolate](https://user-images.githubusercontent.com/57213004/110491776-e3aa6200-80f1-11eb-9965-d7acdb2e8f2e.gif)
+![CmaPourChocolateBread](https://user-images.githubusercontent.com/57213004/110491779-e442f880-80f1-11eb-88f6-10708f9bc01b.gif)
 
 
 ## Warp Flow based Self-Supervised Task
